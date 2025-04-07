@@ -21,9 +21,9 @@
         <param name="gv_vel_lpf_freq" value="1.0" />
         <param name="gv_head_lpf_freq" value="0.5" />
 
-        <param name="standoff_x"  value="-0.8" />
+        <param name="standoff_x"  value="-1.0" />
         <param name="standoff_y"  value="0.0" />
-        <param name="standoff_z"  value="1.44" />
+        <param name="standoff_z"  value="1.8" />
 
         <param name="q_filter_lpf_freq" value="0.1" />
         <param name="time_constant_of_uav" value="0.7" />
@@ -32,7 +32,7 @@
         <param name="vf_phi_delta" value="34.375" />
         <param name="vf_r_max"     value="5.0" />
         <param name="vf_k1"        value="0.3" />
-        <param name="vf_k2"        value="0.28" />
+        <param name="vf_k2"        value="0.3" />
         <param name="vf_margin"    value="17.1888" />
         <param name="vf_c1"        value="8.5" />
         <param name="vf_c2"        value="2.0" />
