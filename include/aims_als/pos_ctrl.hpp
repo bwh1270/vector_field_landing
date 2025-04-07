@@ -43,6 +43,7 @@
 #include <limits>
 #include <algorithm>
 #include <eigen3/Eigen/Dense>
+#include <random>
 
 #include "ros/ros.h"
 

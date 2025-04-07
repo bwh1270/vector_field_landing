@@ -361,6 +361,23 @@ void PositionControl::gvEstiCb(const nav_msgs::Odometry::ConstPtr &msg)
     const Eigen::Vector3d v_prev = gv_.v;
     if (flag_.sitl) {
         gv_.v = R * vec2vec(msg->twist.twist.linear);
+
+        // Gaussian Noise (sigma)
+        const double sigma = 0.30;
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::normal_distribution<double> dist(0.0, sigma);
+
+        Eigen::Vector3d noise;
+        noise << dist(gen), dist(gen), dist(gen);
+
+        // std::cout << "Original Data: " << gv_.v.transpose() << std::endl;
+        
+        gv_.v = gv_.v + noise;
+        
+        // std::cout << "Data w/ Noise: " << gv_.v.transpose() << std::endl;
+
     } else {
         gv_.v = vec2vec(msg->twist.twist.linear);
     }
