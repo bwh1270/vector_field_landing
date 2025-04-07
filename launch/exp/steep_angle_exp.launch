@@ -1,0 +1,90 @@
+<launch>
+    <!-- ARGS -->
+    <arg name="ros_pkg"      default="aims_als" />
+    <arg name="visualize"    default="false" />
+    <arg name="debug"        default="false" />
+    <arg name="world_frame"  default="map" />
+    <arg name="uav_frame"    default="base_link" />
+    <arg name="camera_frame" default="camera_link" />
+    <arg name="camera_name"  default="/camera" />
+    <arg name="image_topic"  default="/image_raw" />
+
+    <node pkg="$(arg ros_pkg)" name="img_pub_node" type="img_pub_exe" output="screen">
+        <param name="camera_name"  value="$(arg camera_name)" />
+        <param name="camera_frame" value="$(arg camera_frame)" />
+        <param name="image_topic"  value="$(arg image_topic)" />
+        <param name="cam_dev_id"   value="0" />
+        <param name="debug"        value="$(arg debug)" />
+    </node>
+
+    <node pkg="$(arg ros_pkg)" name="fractal_detection_node" type="fractal_detection_exe" output="screen">
+        <param name="marker_size"          value="0.50"/> 
+        <param name="marker_configuration" value="FRACTAL_4L_6"/>
+        <param name="debug"                value="$(arg debug)"/>
+        <param name="visualizing"          value="$(arg visualize)"/>
+    </node>
+<!--
+    <node pkg="$(arg ros_pkg)" name="gimbal_ctrl_node" type="gimbal_ctrl.py" output="screen">
+        <param name="loop_rate"   value="50.0"/> 
+        <param name="serial_port" value="/dev/gimbal"/>
+        <param name="baud_rate"   value="115200"/>
+        <param name="debug"       value="$(arg debug)"/>
+    </node>
+-->
+    <node pkg="$(arg ros_pkg)" name="led_ctrl_node" type="led_ctrl.py" output="screen">
+    </node>
+
+    <node pkg="$(arg ros_pkg)" name="steep_angle_exp_node" type="steep_angle_exp_exe" output="screen">
+        <param name="max_num_setpoint" value="1"/> 
+        <param name="range"            value="2.0"/>
+        <param name="duration"         value="5.0"/>
+        <param name="epsilon_error"    value="0ap.25"/>
+    </node>
+
+    <node pkg="aims_als" name="pos_ctrl_node" type="pos_ctrl_exe" output="screen">
+        
+        <param name="with_position" value="true" />
+        <param name="for_gvf"       value="false" />
+        <param name="const_dt"      value="0.02" />
+
+        <param name="lpf_acc_alpha" value="0.1" />
+        <param name="lpf_vel_alpha" value="0.3" />
+        <param name="lpf_ref_alpha" value="1.0" />
+
+        <param name="hover_thrust"  value="0.40" />
+
+        <param name="vel_xy_max" value="6.0" />
+        <param name="vel_z_max"  value="3.0" />
+
+        <param name="integral_vel_xy_max" value="5.0" />
+        <param name="integral_vel_z_max"  value="3.0" />
+
+        <param name="thrust_min" value="0.05" />
+        <param name="thrust_max" value="0.85" />
+
+        <param name="tilt_max"   value="40.0" />
+
+        <param name="vx_kp" value="2.2" />
+        <param name="vx_ki" value="0.80" />
+        <param name="vx_kd" value="0.0" />
+
+        <param name="vy_kp" value="2.2" />
+        <param name="vy_ki" value="0.80" />
+        <param name="vy_kd" value="0.0" />
+
+        <param name="vz_kp" value="4.25" />
+        <param name="vz_ki" value="2.25" />
+        <param name="vz_kd" value="0.0" />
+
+        <param name="px_kp" value="1.35" />
+        <param name="px_kd" value="0.25" />
+        
+        <param name="py_kp" value="1.35" />
+        <param name="py_kd" value="0.25" />
+        
+        <param name="pz_kp" value="1.75" />
+        <param name="pz_kd" value="0.2" />
+
+    </node>
+
+</launch>

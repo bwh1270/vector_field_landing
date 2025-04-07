@@ -1,0 +1,77 @@
+<launch>
+<!-- @Hover thrust annotation -->
+    <!-- Typhoon480 SITL is 0.4455 -->
+    <!-- Aims-Hexa-v3 is 0.40 -->
+    <!-- Iris SITL is 0.70 -->
+    <!-- Aims-Quad-Gamma is 0.365 -->
+    <node pkg="aims_als" name="pos_ctrl_node" type="pos_ctrl_exe" output="screen">
+        <param name="Hz_of_MONITOR" value="1.0"/>
+
+        <param name="feedforward" value="true" />
+        <param name="DOB"         value="true" />
+        <param name="debug"       value="false" />
+        <param name="sitl"        value="true" />
+        <param name="logging"     value="false" />
+
+        <param name="uav_vel_lpf_freq"  value="1.5" />
+        <param name="uav_acc_lpf_freq"  value="5.0" />
+        <param name="uav_hover_thrust"   value="0.70" />
+
+        <param name="gv_vel_lpf_freq" value="1.0" />
+        <param name="gv_head_lpf_freq" value="5.0" />
+
+        <param name="standoff_x"  value="-0.8" />
+        <param name="standoff_y"  value="0.0" />
+        <param name="standoff_z"  value="1.833" />
+
+        <param name="q_filter_lpf_freq" value="0.08" />
+        <param name="time_constant_of_uav" value="1.0" />
+
+        <param name="vf_phi_des"   value="-27.5" />
+        <param name="vf_phi_delta" value="34.375" />
+        <param name="vf_r_max"     value="5.0" />
+        <param name="vf_k1"        value="0.4481" />
+        <param name="vf_k2"        value="0.45" />
+        <param name="vf_margin"    value="17.1888" />
+        <param name="vf_c1"        value="17" />
+        <param name="vf_c2"        value="4.4114" />
+        <param name="vf_n1"        value="4.0" />
+        <param name="vf_n2"        value="3.0" />
+        <param name="vf_gamma"     value="1.25" />
+
+        <param name="saturation_thrust_min"          value="0.55" />
+        <param name="saturation_thrust_max"          value="0.85" />
+        <param name="saturation_tilt"                value="40.0" />
+        <param name="saturation_const_dt"            value="0.02" />
+        <param name="saturation_vel_xy_max"          value="3.0" />
+        <param name="saturation_vel_z_max"           value="1.0" />
+        <param name="saturation_integral_vel_xy_max" value="5.0" />
+        <param name="saturation_integral_vel_z_max"  value="3.0" />
+        <param name="saturation_no_meas_duration"    value="0.1" />
+        <param name="saturation_critical_altitude"   value="0.25" />
+        <param name="saturation_acc_ratio_for_land"  value="0.5" />
+
+        <param name="vx_kp" value="1.2" />
+        <param name="vx_ki" value="0.8" />
+        <param name="vx_kd" value="0.0" />
+
+        <param name="vy_kp" value="1.2" />
+        <param name="vy_ki" value="0.8" />
+        <param name="vy_kd" value="0.0" />
+
+        <param name="vz_kp" value="2.25" />
+        <param name="vz_ki" value="1.25" />
+        <param name="vz_kd" value="0.0" />
+
+        <param name="px_kp" value="0.8" />
+        <param name="px_kd" value="0.2" />
+        
+        <param name="py_kp" value="0.8" />
+        <param name="py_kd" value="0.2" />
+        
+        <param name="pz_kp" value="1.2" />
+        <param name="pz_kd" value="0.2" />
+
+    </node>
+
+</launch>

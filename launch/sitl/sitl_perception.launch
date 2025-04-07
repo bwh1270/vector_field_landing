@@ -1,0 +1,71 @@
+<launch>
+    <!-- ARGS -->
+    <arg name="ros_pkg" default="aims_als" />
+    <arg name="visualize" default="false" />
+    <arg name="debug" default="false" />
+
+    <arg name="world_frame" default="map" />
+    <arg name="uav_frame" default="base_link" />
+    <arg name="camera_frame" default="camera_link" />
+    <arg name="camera_name" default="/camera" />
+    <arg name="image_topic" default="/image_raw" />
+
+<!-- PERCEPTION -->
+
+    <!-- Convert CV Image to ROS Image -->
+    <node pkg="$(arg ros_pkg)" name="img_pub_node" type="img_pub_exe" output="screen">
+        <param name="camera_name" value="$(arg camera_name)" />
+        <param name="camera_frame" value="$(arg camera_frame)" />
+        <param name="image_topic" value="$(arg image_topic)" />
+        <param name="debug" value="$(arg debug)" />
+    </node>
+
+    <!-- Gimbal Transformation -->    
+    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_pub" args="0 0 -0.15 -1.5708 0 3.14159 base_link camera_link" /> -->
+    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_pub" args="0 0 -0.15 0 0 3.14159 base_link camera_link" /> -->
+
+    <!-- AprilTag ROS Package -->
+    <arg name="launch_prefix" default="" /> 
+    <arg name="node_namespace" default="apriltag_node" />
+    
+    <rosparam command="load" file="$(find aims_als)/config/settings.yaml" ns="$(arg node_namespace)" />
+    <rosparam command="load" file="$(find aims_als)/config/tags.yaml" ns="$(arg node_namespace)" />
+
+    <node pkg="apriltag_ros" type="apriltag_ros_continuous_node" name="$(arg node_namespace)" clear_params="true" output="screen" launch-prefix="$(arg launch_prefix)" >
+		<!-- Remap topics from those used in code to those on the ROS network -->
+		<remap from="image_rect" to="$(arg camera_name)/$(arg image_topic)" />
+		<remap from="camera_info" to="$(arg camera_name)/camera_info" />
+		<param name="cam_frame" type="str" value="$(arg camera_frame)" />
+		<param name="publish_tag_detections_image" type="bool" value="$(arg visualize)" />
+	</node>
+
+    <!-- Republishing tag_detections -->
+    <node pkg="$(arg ros_pkg)" name="tag_repub_node" type="tag_repub_exe" output="screen">
+        <param name="big_tag_id" value="2"/> 
+        <param name="small_tag_id" value="4"/>
+    </node>
+
+    <!-- Publishing Transformed Pose Data -->
+    <node pkg="$(arg ros_pkg)" name="tag_tf_node" type="tag_tf_exe" output="screen">
+        <param name="world_frame" type="str" value="$(arg world_frame)" />
+        <param name="uav_frame" type="str" value="$(arg uav_frame)" />
+        <param name="camera_frame" type="str" value="$(arg camera_frame)" />
+        <param name="node_rate" type="double" value="30" />
+        <param name="lpf_alpha" type="double" value="1.0" />
+    </node>
+    
+    <!-- Just for a Test -->
+    <!-- <node pkg="$(arg ros_pkg)" name="tmp_esti_node" type="tmp_esti_exe" output="screen">
+        <param name="constant_height" type="bool" value="true"/>
+    </node> -->
+
+    <!-- Estimation Transformed Pose of Tag on the Ground Vehicle -->
+    <node pkg="$(arg ros_pkg)" name="tag_esti_node" type="tag_esti_exe" output="screen">
+        <param name="sample_time" value="1/30" />
+        <param name="initial_state_uncertainty" value="500" />
+        <param name="model_acc_uncertainty" value="0.1" />
+        <param name="meas_uncertainty" value="0.0004" />
+        <param name="lambda" value="1.0" />
+    </node>
+
+</launch>

@@ -1,0 +1,17 @@
+material FRACTAL_4L_6
+{
+  technique
+  {
+    pass
+    {
+      lighting off
+      texture_unit
+      {
+        texture FRACTAL_4L_6_50x50_330dpi_32bit.png
+        filtering none none none
+        scale 1.0 1.0
+      }
+    }
+  }
+}
+

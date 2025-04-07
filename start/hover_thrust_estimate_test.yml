@@ -1,0 +1,10 @@
+name: aims_fly
+root: ./
+start_window: main
+windows:
+  - main:
+      layout: tiled
+      panes:
+        - roslaunch aims_als real_world.launch
+        - waitForRos; rostopic echo /mavros/hover_thrust_estimate/hover_thrust
+        - cd $(rospack find aims_als)/data; waitForRos; rosbag record /mavros/local_position/odom /mavros/hover_thrust_estimate/hover_thrust

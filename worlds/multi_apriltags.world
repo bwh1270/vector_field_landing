@@ -1,0 +1,154 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <world name="default">
+    <!-- A global light source -->
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <!-- A ground plane -->
+    <!--
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    
+    <include>
+      <uri>model://asphalt_plane</uri>
+    </include>
+    -->
+  
+    <model name="asphalt_plane">
+      <static>1</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>400 20</size>
+            </plane>
+          </geometry>
+          <surface>
+            <contact>
+              <collide_bitmask>65535</collide_bitmask>
+              <ode/>
+            </contact>
+            <friction>
+              <ode>
+                <mu>100</mu>
+                <mu2>50</mu2>
+              </ode>
+              <torsional>
+                <ode/>
+              </torsional>
+            </friction>
+            <bounce/>
+          </surface>
+          <max_contacts>10</max_contacts>
+        </collision>
+        <visual name='visual'>
+          <cast_shadows>0</cast_shadows>
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>500 20</size>
+            </plane>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://asphalt_plane/materials/scripts</uri>
+              <uri>model://asphalt_plane/materials/textures</uri>
+              <name>asphalt_plane</name>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+
+    <physics name='default_physics' default='0' type='ode'>
+      <gravity>0 0 -9.8066</gravity>
+      <ode>
+        <solver>
+          <type>quick</type>
+          <iters>50</iters>
+          <sor>1.0</sor>
+          <use_dynamic_moi_rescaling>0</use_dynamic_moi_rescaling>
+        </solver>
+        <constraints>
+          <cfm>0</cfm>
+          <erp>0.2</erp>
+          <contact_max_correcting_vel>100</contact_max_correcting_vel>
+          <contact_surface_layer>0.001</contact_surface_layer>
+        </constraints>
+      </ode>
+      <max_step_size>0.004</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
+      <gravity>0 0 -9.8066</gravity>
+      <magnetic_field>6.0e-6 2.3e-5 -4.2e-5</magnetic_field>
+      <atmosphere type='adiabatic'/>
+    </physics>
+    <spherical_coordinates>
+      <surface_model>EARTH_WGS84</surface_model>
+      <latitude_deg>0</latitude_deg>
+      <longitude_deg>0</longitude_deg>
+      <elevation>0</elevation>
+      <heading_deg>0</heading_deg>
+    </spherical_coordinates>
+
+    <model name='Apriltag36_11_00002'>
+      <link name='apriltag_link1'>
+        <pose frame=''>-100 0 0 0 -0 0</pose>
+        <visual name='aprilTag'>
+          <geometry>
+            <box>
+              <size>0.30 0.30 0.005</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://Apriltag36_11_00002/materials/scripts</uri>
+              <uri>model://Apriltag36_11_00002/materials/textures</uri>
+              <name>Apriltag36_11_00002</name>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <static>1</static>
+      <!-- <pose frame=''>2.0055 -1.05659 0 0 -0 0</pose> -->
+    </model>
+    <model name='Apriltag36_11_00004'>
+      <link name='apriltag_link2'>
+        <pose frame=''>-100 0 0 0 -0 0</pose>
+        <visual name='aprilTag'>
+          <geometry>
+            <box>
+              <size>0.125 0.125 0.005</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>model://Apriltag36_11_00004/materials/scripts</uri>
+              <uri>model://Apriltag36_11_00004/materials/textures</uri>
+              <name>Apriltag36_11_00004</name>
+            </script>
+          </material>
+        </visual>
+        <self_collide>0</self_collide>
+        <enable_wind>0</enable_wind>
+        <kinematic>0</kinematic>
+      </link>
+      <static>1</static>
+      <!-- <pose frame=''>2.0055 -1.05659 0 0 -0 0</pose> -->
+    </model>
+    <plugin name='wind_plugin' filename='libgazebo_wind_plugin.so'>
+      <frameId>world</frameId>
+      <robotNamespace/>
+      <windPubTopic>world_wind</windPubTopic>
+    </plugin>
+  </world>
+</sdf>

@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>aims_als</name>
+  <version>0.0.0</version>
+  <description>The aims_als package</description>
+
+  <maintainer email="imbwh@cau.ac.kr">Woohyun Byun</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>sensor_msgs</build_depend>
+  <build_depend>tf2</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+  <build_depend>mavros</build_depend>
+  <build_depend>mavros_msgs</build_depend>
+  <build_depend>mavros_extras</build_depend>
+  <build_depend>apriltag_ros</build_depend>
+  <build_depend>aruco</build_depend>
+  <build_depend>eigen_catkin</build_depend>
+  <build_depend>message_generation</build_depend>  
+  <build_depend>image_transport</build_depend>
+  <build_depend>cv_bridge</build_depend>
+
+  <build_export_depend>roscpp</build_export_depend>
+  <build_export_depend>rospy</build_export_depend>
+  <build_export_depend>std_msgs</build_export_depend>
+  <build_export_depend>geometry_msgs</build_export_depend>
+  <build_export_depend>sensor_msgs</build_export_depend>
+  <build_export_depend>tf2</build_export_depend>
+  <build_export_depend>tf2_ros</build_export_depend>
+  <build_export_depend>tf2_geometry_msgs</build_export_depend>
+  <build_export_depend>mavros</build_export_depend>
+  <build_export_depend>mavros_msgs</build_export_depend>
+  <build_export_depend>mavros_extras</build_export_depend>
+  <build_export_depend>apriltag_ros</build_export_depend>
+  <build_export_depend>aruco</build_export_depend>
+  <build_export_depend>image_transport</build_export_depend>
+  <build_export_depend>cv_bridge</build_export_depend>
+
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>rospy</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>tf2</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>image_transport</exec_depend>
+  <exec_depend>mavros</exec_depend>
+  <exec_depend>mavros_msgs</exec_depend>
+  <exec_depend>mavros_extras</exec_depend>
+  <exec_depend>apriltag_ros</exec_depend>
+  <exec_depend>aruco</exec_depend>
+  <exec_depend>gazebo_ros</exec_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <exec_depend>cv_bridge</exec_depend>
+
+  <export>
+    <gazebo_ros gazebo_media_path="${prefix}"/>
+  </export>
+</package>

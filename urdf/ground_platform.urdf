@@ -1,0 +1,252 @@
+<?xml version="1.0"?>
+<robot name="ground_platform">
+
+	<!-- Dummy link -->
+	<!-- <link name="dummy">
+	</link> -->
+
+	<link name="ground_platform_link">
+		<visual>
+			<geometry>
+				<box size="0.6 0.4 0.3"/>
+			</geometry>
+			<material name="Gazebo/Grey">
+				<color rgba="0.937 0.161 0.161 1"/>
+			</material>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="0.6 0.4 0.3"/>
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="5.0"/>
+			<inertia ixx="0.93854167" iyy="0.93854167" izz="1.87500"
+							ixy="0.0" ixz="0.0" iyz="0.0"/>
+		</inertial>
+	</link>
+	<!-- <joint name="dummy_joint" type="fixed">
+		<axis xyz="0 0 1"/>
+		<parent link="dummy"/>
+		<child link="ground_platform_link"/>
+		<origin rpy="0 0 0" xyz="0 0 0"/>
+	</joint> -->
+
+	<link name="front_left_wheel">
+		<visual>
+			<geometry>
+				<cylinder length="0.05" radius="0.1"/>
+			</geometry>
+			<material name="black">
+				<color rgba="0 0 0 1"/>
+			</material>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder length="0.05" radius="0.1"/>
+			</geometry>
+			<contact_coefficients>
+				<mu>0.5</mu>
+			</contact_coefficients>
+		</collision>
+		<inertial>
+			<mass value="1.0"/>
+			<inertia ixx="0.00110833" iyy="0.00110833" izz="0.0018"
+				ixy="0.0" ixz="0.0" iyz="0.0"/>
+		</inertial>
+	</link>
+	<joint name="front_left_wheel_joint" type="continuous">
+		<axis xyz="0 0 1"/>
+		<parent link="ground_platform_link"/>
+		<child link="front_left_wheel"/>
+		<origin rpy="-1.5708 0 0" xyz="0.179671 0.2 -0.087435"/>
+	</joint>
+	
+	<link name="front_right_wheel">
+		<visual>
+			<geometry>
+				<cylinder length="0.05" radius="0.1"/>
+			</geometry>
+			<material name="black">
+				<color rgba="0 0 0 1"/>
+			</material>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder length="0.05" radius="0.1"/>
+			</geometry>
+			<contact_coefficients>
+				<mu>0.5</mu>
+			</contact_coefficients>
+		</collision>
+		<inertial>
+			<mass value="1.0"/>
+			<inertia ixx="0.00110833" iyy="0.00110833" izz="0.0018"
+				ixy="0.0" ixz="0.0" iyz="0.0"/>
+		</inertial>
+	</link>
+	<joint name="front_right_wheel_joint" type="continuous">
+		<axis xyz="0 0 1"/>
+		<parent link="ground_platform_link"/>
+		<child link="front_right_wheel"/>
+		<origin rpy="-1.5708 0 0" xyz="0.179671 -0.2 -0.087435"/>
+	</joint>
+	
+	<link name="rear_left_wheel">
+		<visual>
+			<geometry>
+				<cylinder length="0.05" radius="0.1"/>
+			</geometry>
+			<material name="black">
+				<color rgba="0 0 0 1"/>
+			</material>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder length="0.05" radius="0.1"/>
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="1.0"/>
+			<inertia ixx="0.00110833" iyy="0.00110833" izz="0.0018"
+				ixy="0.0" ixz="0.0" iyz="0.0"/>
+		</inertial>
+	</link>
+	<joint name="rear_left_wheel_joint" type="continuous">
+		<axis xyz="0 0 1"/>
+		<parent link="ground_platform_link"/>
+		<child link="rear_left_wheel"/>
+		<origin rpy="-1.5708 0 0" xyz="-0.179671 0.2 -0.087435"/>
+	</joint>
+	
+	<link name="rear_right_wheel">
+		<visual>
+			<geometry>
+				<cylinder length="0.05" radius="0.1"/>
+			</geometry>
+			<material name="black">
+				<color rgba="0 0 0 1"/>
+			</material>
+		</visual>
+		<collision>
+			<geometry>
+				<cylinder length="0.05" radius="0.1"/>
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="1.0"/>
+			<inertia ixx="0.00110833" iyy="0.00110833" izz="0.0018"
+				ixy="0.0" ixz="0.0" iyz="0.0"/>
+		</inertial>
+	</link>
+	<joint name="rear_right_wheel_joint" type="continuous">
+		<axis xyz="0 0 1"/>
+		<parent link="ground_platform_link"/>
+		<child link="rear_right_wheel"/>
+		<origin rpy="-1.5708 0 0" xyz="-0.179671 -0.2 -0.087435"/>
+	</joint>
+	
+
+	<link name="plate_link">
+		<visual>
+			<geometry>
+				<box size="1.5 1.5 0.05"/>
+			</geometry>
+		</visual>
+		<collision>
+			<geometry>
+				<box size="1.5 1.5 0.03"/>
+			</geometry>
+		</collision>
+		<inertial>
+			<mass value="3.0"/>
+			<inertia ixx="0.563125" iyy="0.563125" izz="1.125"
+							ixy="0.0" ixz="0.0" iyz="0.0"/>
+		</inertial>
+	</link>
+	<joint name="plate_joint" type="fixed">
+		<parent link="ground_platform_link"/>
+		<child link="plate_link"/>
+		<origin rpy="0 0 0" xyz="0 0 0.15"/>
+	</joint>
+
+	<!-- Fractal marker -->
+	<link name="fractal_marker_link">
+		<visual>
+		<geometry>
+			<box size='0.50 0.50 0.005' rpy="0 0 0"/>
+		</geometry>
+
+		</visual>
+		<collision>
+		<origin xyz="0 0 0.0" rpy="0 0 0" />
+		<geometry>
+			<box size="0.50 0.50 0.005" rpy="0 0 0" />
+		</geometry>
+		</collision>
+		<inertial>
+		<mass value="0.1"/>
+		<inertia ixx="0.0001" iyy="0.0001" izz="0.0001"
+				ixy="0.0" ixz="0.0" iyz="0.0"/>
+		</inertial>
+	</link>
+	<joint name="fractal_marker_joint" type="fixed">
+		<parent link="plate_link"/>
+		<child link="fractal_marker_link"/>
+		<origin rpy="0 0 1.5708" xyz="0 0 0.03"/>
+	</joint>
+	<gazebo reference="fractal_marker_link">
+		<material>FRACTAL_4L_6</material>
+	</gazebo>
+
+
+	<!-- IMU 센서가 장착될 링크 -->
+	<link name="imu_link">
+		<inertial>
+		<mass value="0.1"/>
+		<origin xyz="0 0 0"/>
+		<inertia ixx="0.001" iyy="0.001" izz="0.001" ixy="0.0" ixz="0.0" iyz="0.0"/>
+		</inertial>
+	</link>
+
+	<!-- imu_link와 base_link 연결 (고정) -->
+	<joint name="imu_joint" type="fixed">
+		<parent link="fractal_marker_link"/>
+		<child link="imu_link"/>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+	</joint>
+
+	<!-- Gazebo 플러그인으로 IMU 센서 추가 -->
+	<gazebo>
+		<plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
+		<alwaysOn>true</alwaysOn>
+		<updateRate>100.0</updateRate> <!-- 100Hz -->
+		<bodyName>imu_link</bodyName>
+		<topicName>/fractal_marker/imu/data</topicName>
+		<gaussianNoise>0.0</gaussianNoise>
+		<frameName>imu_link</frameName>
+		</plugin>
+	</gazebo>
+	
+
+	<!-- Plugins -->
+	<gazebo>
+		<plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
+			<leftJoint>front_left_wheel_joint</leftJoint>
+			<rightJoint>front_right_wheel_joint</rightJoint>
+			<robotBaseFrame>ground_platform_link</robotBaseFrame>
+			<wheelSeparation>0.4</wheelSeparation>
+			<wheelDiameter>0.2</wheelDiameter>
+			<publishWheelJointState>true</publishWheelJointState>
+		</plugin>
+	</gazebo>
+	
+	<gazebo>
+		<plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
+			<jointName>rear_left_wheel_joint, rear_right_wheel_joint</jointName>
+		</plugin>
+	</gazebo>
+
+
+</robot>
+

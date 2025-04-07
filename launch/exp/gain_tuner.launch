@@ -1,0 +1,19 @@
+<launch>
+<!-- @brief -->
+    <!-- Step Reference Signal for Position and Velocity -->
+    <!-- what = {position, velocity} -->
+    <!-- axis = {x,y,z}              -->
+    <!-- head = [deg]                -->
+
+    <node pkg="aims_als" name="pid_tuner_node" type="pid_tuner_node" output="screen">
+        
+        <param name="tuning_what"   value="position" />
+        <param name="tuning_axis"   value="z" />
+        <param name="head_setpoint" value="0." />
+        
+        <param name="step_input_size" value="1.5" />
+        <param name="step_duration"   value="2" />
+
+    </node>
+
+</launch>

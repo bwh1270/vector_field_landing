@@ -1,0 +1,58 @@
+<launch>
+    <!-- ARGS -->
+    <arg name="ros_pkg" default="aims_als" />
+    <arg name="world_frame" default="map" />
+    <arg name="uav_frame" default="base_link" />
+    <arg name="camera_frame" default="camera_link" />
+    <arg name="camera_name" default="/camera" />
+    <arg name="image_topic" default="/image_raw" />
+
+
+    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_pub" args="0 0 -0.15 -1.5708 0 3.14159 base_link camera_link" /> -->
+    <!-- <node pkg="tf2_ros" type="static_transform_publisher" name="static_transform_pub" args="0 0 -0.15 0 0 3.14159 base_link camera_link" /> -->
+
+    <node pkg="$(arg ros_pkg)" name="tag_tf_node" type="tag_tf_exe" output="screen">
+        <param name="world_frame" type="str" value="$(arg world_frame)" />
+        <param name="uav_frame" type="str" value="$(arg uav_frame)" />
+        <param name="camera_frame" type="str" value="$(arg camera_frame)" />
+        <param name="node_rate" type="double" value="30" />
+        <param name="lpf_alpha" type="double" value="1.0" />
+    </node>
+    
+    <node pkg="$(arg ros_pkg)" name="tag_esti_node" type="tag_esti_exe" output="screen">
+        <param name="sample_time" value="1/30" />
+        <param name="initial_state_uncertainty" value="500" />
+        <param name="model_acc_uncertainty" value="0.1" />
+        <param name="meas_uncertainty" value="0.0004" />
+        <param name="lambda" value="1" />
+    </node>
+
+    <node pkg="rqt_plot" type="rqt_plot" name="velocity_estimate" 
+          args="/aims/b_tag_tf_esti/twist/twist/linear/x 
+                /aims/b_tag_tf_esti/twist/twist/linear/y 
+                /aims/gv_esti/twist/twist/linear/x
+                /aims/gv_esti/twist/twist/linear/y
+                -t" 
+          output="screen" />
+
+    <!-- <node pkg="rqt_plot" type="rqt_plot" name="position" 
+          args="/aims/b_tag_tf/pose/pose/position/x 
+                /aims/b_tag_tf/pose/pose/position/y 
+                -t" 
+          output="screen" /> -->
+
+      <node pkg="$(arg ros_pkg)" name="decision_maker_node" type="decision_maker_exe" output="screen">
+        <param name="constant_alt" value="true"/>
+        <param name="feedforward"  value="true"/>
+
+        <param name="b_tag_alt"    value="1.85"/>
+        <param name="s_tag_alt"    value="1.6"/>
+        <param name="max_ref_alt"  value="3.0"/>
+        <param name="min_ref_alt"  value="1.2"/>
+
+        <param name="cutoff_freq"  value="2.25"/>
+        <param name="dt"           value="0.04"/>
+    </node>
+
+
+</launch>

@@ -1,0 +1,86 @@
+##---------------------------------------##
+|| PIDTuner Node is initialized..!
+|| Selected: [position]
+|| Head setpoint = [0.00]
+|| Selected: [z]-axis in {W}
+|| Setpoint: [1.50] step input during [2.00] seconds
+##---------------------------------------##
+Initial [x,y,z] = [0.02, 5.23, 0.55]
+Response is tracking now...
+Stop measuring response due to [t >= tf]
+##------------------------------##
+|| Response results: 
+|| Rise Time:          [1.61996]
+|| Settling Time:      [0.00000]
+|| Maximum Peak Value: [1.36626]
+|| Last Response:      [1.36626]
+|| Tuning process is terminated...
+##------------------------------##
+[0m[ INFO] [1738390665.693309952]: Mode changed to AUTO.LOITER[0m
+... logging to /home/aims/.ros/log/462f335c-e060-11ef-9e92-204ef6c5f345/roslaunch-aims-desktop-7114.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;/home/aims/als_ws/src/aims_als/launch/test/gain_tuner.launch
+[1mstarted roslaunch server http://aims-desktop:37013/[0m
+
+SUMMARY
+========
+
+PARAMETERS
+ * /pid_tuner_node/head_setpoint: 0.0
+ * /pid_tuner_node/step_duration: 2
+ * /pid_tuner_node/step_input_size: 1.5
+ * /pid_tuner_node/tuning_axis: z
+ * /pid_tuner_node/tuning_what: position
+ * /rosdistro: noetic
+ * /rosversion: 1.16.0
+
+NODES
+  /
+    pid_tuner_node (aims_als/pid_tuner_node)
+
+[1mROS_MASTER_URI=http://localhost:11311[0m
+]2;/home/aims/als_ws/src/aims_als/launch/test/gain_tuner.launch http://localhost:11311
+[1mprocess[pid_tuner_node-1]: started with pid [7139][0m
+[pid_tuner_node-1] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m
+##---------------------------------------##
+|| PIDTuner Node is initialized..!
+|| Selected: [position]
+|| Head setpoint = [0.00]
+|| Selected: [z]-axis in {W}
+|| Setpoint: [1.50] step input during [2.00] seconds
+##---------------------------------------##
+... logging to /home/aims/.ros/log/7fa439a2-e461-11ef-b5c4-48b02d2f8147/roslaunch-aims-desktop-172018.log
+Checking log directory for disk usage. This may take a while.
+Press Ctrl-C to interrupt
+Done checking log file disk usage. Usage is <1GB.
+]2;/home/aims/als_ws/src/aims_als/launch/test/gain_tuner.launch
+[1mstarted roslaunch server http://aims-desktop:42889/[0m
+
+SUMMARY
+========
+
+PARAMETERS
+ * /pid_tuner_node/head_setpoint: 0.0
+ * /pid_tuner_node/step_duration: 2
+ * /pid_tuner_node/step_input_size: 1.5
+ * /pid_tuner_node/tuning_axis: z
+ * /pid_tuner_node/tuning_what: position
+ * /rosdistro: noetic
+ * /rosversion: 1.16.0
+
+NODES
+  /
+    pid_tuner_node (aims_als/pid_tuner_node)
+
+[1mROS_MASTER_URI=http://localhost:11311[0m
+]2;/home/aims/als_ws/src/aims_als/launch/test/gain_tuner.launch http://localhost:11311
+[1mprocess[pid_tuner_node-1]: started with pid [172161][0m
+[pid_tuner_node-1] killing on exit
+shutting down processing monitor...
+... shutting down processing monitor complete
+[1mdone[0m

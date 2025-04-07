@@ -1,0 +1,26 @@
+<launch>
+    <!-- ARGS -->
+    <arg name="ros_pkg" default="aims_als" />
+
+    <node pkg="$(arg ros_pkg)" name="guidance_node" type="guidance_exe" output="screen">
+        <!-- <param name="k1"         value="1.44"/>
+        <param name="k2"         value="0.836"/>
+        <param name="eps1"       value="2.0"/>
+        <param name="eps2"       value="4.0"/> -->
+
+        <param name="k1"         value="1.6"/>
+        <param name="k2"         value="1.4"/>
+        <param name="eps1"       value="1.0"/>
+        <param name="eps2"       value="1.5"/>
+
+        <param name="r_max"      value="3"/>
+
+        <param name="phi_des"    value="90+35"/>
+        <param name="phi_1"      value="90+25"/>
+
+        <param name="alpha"      value="3.14"/>
+
+        <param name="eps_z"      value="0.20"/>
+        <param name="impact_vel" value="0.5"/>
+    </node>
+</launch>

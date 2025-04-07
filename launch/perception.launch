@@ -1,0 +1,49 @@
+<launch>
+    <!-- ARGS -->
+    <arg name="ros_pkg"      default="aims_als" />
+    <arg name="world_frame"  default="map" />
+    <arg name="uav_frame"    default="base_link" />
+    <arg name="camera_frame" default="camera_link" />
+    <arg name="camera_name"  default="/camera" />
+    <arg name="image_topic"  default="/image_raw" />
+    <arg name="visualize"    default="false" />
+    <arg name="debug"        default="false" />
+
+    <!-- PARAMS -->
+    <rosparam file="$(find aims_als)/config/arducam_param.yaml" />
+
+    <!-- NODES -->
+    <node pkg="$(arg ros_pkg)" name="img_pub_node" type="img_pub_exe" output="screen">
+        <param name="camera_name"  value="$(arg camera_name)" />
+        <param name="camera_frame" value="$(arg camera_frame)" />
+        <param name="image_topic"  value="$(arg image_topic)" />
+        <param name="cam_dev_id"   value="0" />
+        <param name="visualize"    value="$(arg visualize)" />
+        <param name="logging"      value="false" />
+    </node>
+
+    <node pkg="$(arg ros_pkg)" name="fractal_detection_node" type="fractal_detection_exe" output="screen">
+        <param name="marker_size"          value="0.44"/> 
+        <param name="marker_configuration" value="FRACTAL_4L_6"/>
+        <param name="debug"                value="$(arg debug)"/>
+        <param name="visualize"            value="$(arg visualize)"/>
+    </node>
+
+   <node pkg="$(arg ros_pkg)" name="gimbal_ctrl_node" type="gimbal_ctrl.py" output="screen">
+        <param name="loop_rate"          value="50.0"/> 
+        <param name="serial_port"        value="/dev/gimbal"/>
+        <param name="baud_rate"          value="115200"/>
+        <param name="debug"              value="$(arg debug)"/>
+        <param name="init_pitch"         value="-90.0"/>
+        <param name="pitch_margin_ratio" value="0.10"/>
+    </node>
+
+    <node pkg="$(arg ros_pkg)" name="tag_esti_node" type="tag_esti_exe" output="screen">
+        <param name="sample_time" value="1/50" />
+        <param name="initial_state_uncertainty" value="500" />
+        <param name="model_acc_uncertainty" value="0.1" />
+        <param name="meas_uncertainty" value="0.005" />
+        <param name="gv_z_alpha" value="0.3" />
+    </node>
+
+</launch>
