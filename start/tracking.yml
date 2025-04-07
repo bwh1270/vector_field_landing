@@ -7,12 +7,12 @@ windows:
       panes:
         - waitForRos; roslaunch aims_als real_world.launch
         - cam_auto; roslaunch aims_als perception.launch
-        - waitForRos; roslaunch aims_als decision_making.launch
-        - waitForRos; spi; roslaunch aims_als controller.launch
+        - waitForRos; sleep 5; roslaunch aims_als decision_making.launch
+        - waitForRos; spi; sleep 10; roslaunch aims_als controller.launch
 
   - monitor:
       layout: tiled
       panes:
-        - waitForRos; rostopic echo /aims/gv_esti     
-        - waitForRos; rostopic echo /mavros/local_position/odom
-        - cd /home/aims/log; waitForRos; rosbag record /camera/image_raw/compressed
+        - waitForRos; sleep 15; rostopic echo /aims/gv_esti     
+        - waitForRos; sleep 15; rostopic echo /mavros/local_position/odom
+        - cd /home/aims/log; waitForRos; sleep 15; rosbag record /camera/image_raw/compressed
