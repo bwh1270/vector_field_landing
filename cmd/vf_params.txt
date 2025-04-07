@@ -1,0 +1,18 @@
+For a static platform
+- initial positions (lon, alt):
+    - (0.2, 2.0)
+    - (-1, 1.8)
+    - (-1.8, 1.4)
+
+- parameters (14.8V 4200mAh 50C+):
+    <param name="vf_phi_des"   value="-27.5" />
+    <param name="vf_phi_delta" value="34.375" />
+    <param name="vf_r_max"     value="5.0" />
+    <param name="vf_k1"        value="0.25" />
+    <param name="vf_k2"        value="0.25" />
+    <param name="vf_margin"    value="17.1888" />
+    <param name="vf_c1"        value="8.5" />
+    <param name="vf_c2"        value="2.0" />
+    <param name="vf_n1"        value="4.0" />
+    <param name="vf_n2"        value="3.0" />
+    <param name="vf_gamma"     value="2.5" />

@@ -26,8 +26,3 @@ rostopic pub -r 50 /aims/fsm_state std_msgs/Int32 "{data: 0}"
 rostopic pub -r 50 /aims/fractal_detections aims_als/Marker "{detect: true, pose_stmp: {header: {stamp: now, frame_id: 'map'}, pose: {position: {x: 0.0, y: 0.0, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}}"
 rostopic pub -r 50 /aims/gimbal_angles geometry_msgs/PointStamped "{point: {x: 0, y: -90, z: 0}}"
 rostopic pub -r 50 /aims/gv_esti nav_msgs/Odometry "{pose: {pose: {position: {x: 0, y: 0, z: 0}, orientation: {w: 0.7071, x: 0, y: 0.0, z: 0.7071}}}}"
-
-# VF
-(0.2, 2.0)
-(-1, 1.8)
-(-1.8, 1.4)
