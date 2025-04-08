@@ -52,7 +52,8 @@ class EstimationTag
         ros::Publisher  pub_odom_tag_esti_;
 
         std::string topicname_;
-
+        bool _delay_compensation;
+        
         double _dt;
         double _P0;
         double _acc_cov;

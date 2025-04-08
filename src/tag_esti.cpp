@@ -10,6 +10,7 @@ topicname_(topicname)
     nh_private_.param<double>("model_acc_uncertainty", _acc_cov, 10.);
     nh_private_.param<double>("meas_uncertainty", _meas_cov, 0.014);
     nh_private_.param<double>("gv_z_alpha", gv_.alpha, 1.0);
+    nh_private_.param<bool>("delay_compensation", _delay_compensation, false);
 
 
     sub_pose_tag_tf_   = nh_.subscribe("/aims/" + topicname_, 1, &EstimationTag::measureCb, this, ros::TransportHints().tcpNoDelay());
@@ -141,17 +142,36 @@ Q_t EstimationTag::setQd()
 void EstimationTag::publish(const esti_t &x_hat)
 {
     nav_msgs::Odometry odom_msg;
-    odom_msg.header = header_;
-    odom_msg.pose.pose.position.x = x_hat.x(0);
-    odom_msg.pose.pose.position.y = x_hat.x(1);
-    odom_msg.twist.twist.linear.x = x_hat.x(2);
-    odom_msg.twist.twist.linear.y = x_hat.x(3);
-
     odom_msg.pose.pose.position.z = gv_.z_esti;
     odom_msg.pose.pose.orientation.w = gv_.q(0);
     odom_msg.pose.pose.orientation.x = gv_.q(1);
     odom_msg.pose.pose.orientation.y = gv_.q(2);
     odom_msg.pose.pose.orientation.z = gv_.q(3);
+
+
+    if (_delay_compensation) {
+        double now = ros::Time::now().toSec();
+        double dt = now - header_.stamp.toSec();
+        int num_of_steps = static_cast<int>(dt / _dt);  
+        
+        esti_t _x_hat = x_hat_;
+        for (int i=0; i<num_of_steps; ++i) {
+            _x_hat = lkf_.predict(_x_hat, u_); 
+        }
+        
+        odom_msg.header.stamp = now;
+        odom_msg.pose.pose.position.x = _x_hat.x(0);
+        odom_msg.pose.pose.position.y = _x_hat.x(1);
+        odom_msg.twist.twist.linear.x = _x_hat.x(2);
+        odom_msg.twist.twist.linear.y = _x_hat.x(3);
+
+    } else {
+        odom_msg.header = header_;
+        odom_msg.pose.pose.position.x = x_hat.x(0);
+        odom_msg.pose.pose.position.y = x_hat.x(1);
+        odom_msg.twist.twist.linear.x = x_hat.x(2);
+        odom_msg.twist.twist.linear.y = x_hat.x(3);
+    }
 
     pub_odom_tag_esti_.publish(odom_msg);
 }
