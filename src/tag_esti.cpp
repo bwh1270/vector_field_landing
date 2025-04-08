@@ -159,7 +159,7 @@ void EstimationTag::publish(const esti_t &x_hat)
             _x_hat = lkf_.predict(_x_hat, u_); 
         }
         
-        odom_msg.header.stamp = now;
+        odom_msg.header.stamp = ros::Time::now();
         odom_msg.pose.pose.position.x = _x_hat.x(0);
         odom_msg.pose.pose.position.y = _x_hat.x(1);
         odom_msg.twist.twist.linear.x = _x_hat.x(2);
