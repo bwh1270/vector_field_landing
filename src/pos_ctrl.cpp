@@ -406,7 +406,7 @@ void PositionControl::posCtrl(const Eigen::Vector3d &p_des, const Eigen::Vector3
     
     // (2) compute the control law
     Eigen::Vector3d u = P_.P * e + P_.D * (-v);
-    if (flag_.ff) {
+    if ((flag_.ff) && (uav_.fsm != 4)) {
         u = u + v_des;
     }
 
