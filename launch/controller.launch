@@ -23,7 +23,8 @@
 
         <param name="standoff_x"  value="-0.8" />
         <param name="standoff_y"  value="0.0" />
-        <param name="standoff_z"  value="1.8" />
+        <param name="standoff_z"  value="1.6" />
+        <param name="a_cmd_alpha"  value="0.2" />
 
         <param name="q_filter_lpf_freq" value="0.1" />
         <param name="time_constant_of_uav" value="0.7" />
@@ -31,16 +32,15 @@
         <param name="vf_phi_des"   value="-27.5" />
         <param name="vf_phi_delta" value="34.375" />
         <param name="vf_r_max"     value="5.0" />
-        <param name="vf_k1"        value="0.7" />
-        <param name="vf_k2"        value="0.7" />
+        <param name="vf_k1"        value="0.35" />
+        <param name="vf_k2"        value="0.32" />
         <param name="vf_margin"    value="17.1888" />
         <param name="vf_c1"        value="8.5" />
         <param name="vf_c2"        value="2.0" />
         <param name="vf_n1"        value="4.0" />
         <param name="vf_n2"        value="3.0" />
-        <param name="vf_gamma"     value="2." />
+        <param name="vf_gamma"     value="2.5" />
         <param name="vf_moving"    value="true" />
-        <param name="a_cmd_alpha"  value="0.2" />
 
         <param name="saturation_thrust_min"          value="0.35" />
         <param name="saturation_thrust_max"          value="0.65" />
@@ -51,7 +51,7 @@
         <param name="saturation_integral_vel_xy_max" value="5.0" />
         <param name="saturation_integral_vel_z_max"  value="3.0" />
         <param name="saturation_no_meas_duration"    value="0.1" />
-        <param name="saturation_critical_altitude"   value="0.38" />
+        <param name="saturation_critical_altitude"   value="0.35" />
 
 
         <param name="vx_kp" value="2.2" />
