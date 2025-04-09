@@ -15,4 +15,4 @@ windows:
       panes:
         - waitForRos; sleep 15; rostopic echo /aims/gv_esti     
         - waitForRos; sleep 15; rostopic echo /mavros/local_position/odom
-        - cd /home/aims/log; waitForRos; sleep 15; rosbag record /camera/image_raw/compressed
+        - cd /home/aims/log; waitForRos; sleep 15; rosbag record /camera/image_raw/compressed /aims/transformed_marker
