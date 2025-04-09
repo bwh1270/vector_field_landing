@@ -183,6 +183,8 @@ class PositionControl
             double gamma;
             Eigen::Vector2d h;
             Eigen::Vector3d a_law;
+            double a_cmd_alpha;
+            bool moving;
         };
 
         struct cmd_t {

@@ -40,6 +40,8 @@ MAX_SIZE(20)
     nh_private_.param<double>("vf_n1", vf_.n1, 4.0);
     nh_private_.param<double>("vf_n2", vf_.n2, 3.0);
     nh_private_.param<double>("vf_gamma", vf_.gamma, 1.0);
+    nh_private_.param<double>("vf_moving", vf_.moving, false);
+    nh_private_.param<double>("a_cmd_alpha", vf_.a_cmd_alpha, 1.0);
     vf_.phi_des = aims_fly::deg2rad(vf_.phi_des);
     vf_.phi_delta = aims_fly::deg2rad(vf_.phi_delta);
     // vf_.c1 = aims_fly::deg2rad(vf_.c1);
@@ -447,6 +449,8 @@ void PositionControl::velCtrl(const Eigen::Vector3d &v_des, const Eigen::Vector3
         u = u_c;
     }
 
+    const Eigen::Vector3d cmd_a_prev = cmd_.a;
+
     if (uav_.fsm == 4) {
         // Proj
         const Eigen::Vector3d a_lat = getLatVec(u);
@@ -465,6 +469,7 @@ void PositionControl::velCtrl(const Eigen::Vector3d &v_des, const Eigen::Vector3
     }
 
     // (3) acc2thrAtti
+    cmd_.a = aims_fly::lpfv3(cmd_.a, cmd_.a_cmd_alpha, cmd_a_prev);
     acc2thrAtti(cmd_.a, uav_.b3);
 
     // (4) integral clamping
@@ -588,6 +593,11 @@ Eigen::Vector3d PositionControl::calVFAccLaw()
     const double c = -vf_.k1 * exp(-pow((rel_phi_err / vf_.c1), vf_.n1)) * pow(rel_r, 1./vf_.n2);
     const double s = -vf_.k2 * tanh(rel_phi_err * vf_.c2) * rel_r;
     vf_.h << c, s;
+    if (vf_.moving) {
+        Eigen::Vector2d gv_vxy(gv_.v(0), gv_.v(1));
+        gv_vxy = gv_vxy.dot(gv_.R.col(0))*gv_.R.col(0);
+        vf_.h = vf_.h + gv_vxy;
+    }
 
     Eigen::Matrix2d Ja_h;
     Ja_h(0,0) = (-vf_.k1 / vf_.n2) * exp(-pow((rel_phi_err / vf_.c1), vf_.n1)) * pow(rel_r, (1./vf_.n2) - 1);

@@ -39,6 +39,8 @@
         <param name="vf_n1"        value="4.0" />
         <param name="vf_n2"        value="3.0" />
         <param name="vf_gamma"     value="2." />
+        <param name="vf_moving"    value="true" />
+        <param name="a_cmd_alpha"  value="0.2" />
 
         <param name="saturation_thrust_min"          value="0.35" />
         <param name="saturation_thrust_max"          value="0.65" />
