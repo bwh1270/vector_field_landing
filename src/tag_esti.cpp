@@ -155,7 +155,7 @@ void EstimationTag::publish(const esti_t &x_hat)
         int num_of_steps = static_cast<int>(dt / _dt);  
         
         esti_t _x_hat = x_hat_;
-        for (int i=0; i<(num_of_steps*22); ++i) {
+        for (int i=0; i<num_of_steps; ++i) {
             _x_hat = lkf_.predict(_x_hat, u_); 
         }
         
