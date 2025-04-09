@@ -24,6 +24,7 @@ MAX_SIZE(20)
     nh_private_.param<double>("standoff_x", cmd_.standoff(0), 0.0);
     nh_private_.param<double>("standoff_y", cmd_.standoff(1), 0.0);
     nh_private_.param<double>("standoff_z", cmd_.standoff(2), 2.0);
+    nh_private_.param<double>("a_cmd_alpha", cmd_.a_cmd_alpha, 1.0);
     assert(cmd_.standoff(0) <= 0.0);
 
     nh_private_.param<double>("q_filter_lpf_freq", dob_.q_lpf_freq, 0.01);
@@ -40,8 +41,7 @@ MAX_SIZE(20)
     nh_private_.param<double>("vf_n1", vf_.n1, 4.0);
     nh_private_.param<double>("vf_n2", vf_.n2, 3.0);
     nh_private_.param<double>("vf_gamma", vf_.gamma, 1.0);
-    nh_private_.param<double>("vf_moving", vf_.moving, false);
-    nh_private_.param<double>("a_cmd_alpha", vf_.a_cmd_alpha, 1.0);
+    nh_private_.param<bool>("vf_moving", vf_.moving, false);
     vf_.phi_des = aims_fly::deg2rad(vf_.phi_des);
     vf_.phi_delta = aims_fly::deg2rad(vf_.phi_delta);
     // vf_.c1 = aims_fly::deg2rad(vf_.c1);

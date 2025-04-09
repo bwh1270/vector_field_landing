@@ -183,7 +183,6 @@ class PositionControl
             double gamma;
             Eigen::Vector2d h;
             Eigen::Vector3d a_law;
-            double a_cmd_alpha;
             bool moving;
         };
 
@@ -195,6 +194,7 @@ class PositionControl
             Eigen::Vector4d q;
             double thr_c;  // collective thrust
             double thr_l;  
+            double a_cmd_alpha;
         };
 
         struct dob_t {
