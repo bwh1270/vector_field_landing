@@ -226,6 +226,7 @@ class PositionControl
             double acc_ratio;
             double t;
             double t_end;
+            double land_pnt_alt;
         };
 
         struct pid_gain_t {

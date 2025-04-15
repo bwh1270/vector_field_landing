@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <deque>
 #include <algorithm>
 #include <eigen3/Eigen/Dense>
 
@@ -16,6 +17,7 @@
 #include "aims_als/lib/util.h"
 #include "aims_als/lib/math.h"
 #include "aims_als/lib/lkf.h"
+#include "aims_als/lib/filter.h"
 
 using namespace aims_fly;
 
@@ -53,6 +55,8 @@ class EstimationTag
 
         std::string topicname_;
         bool _delay_compensation;
+        bool _z_sg_filter;
+        bool _xy_sg_filter;
         
         double _dt;
         double _P0;
@@ -75,6 +79,20 @@ class EstimationTag
 
         double t_prev_;
         std_msgs::Header header_;
+
+        struct gv_sgf_t {
+            int window;
+            int poly;
+            int deriv;
+            std::vector<double> coeffs;
+            std::deque<double> z;
+            std::deque<double> x;
+            std::deque<double> y;
+            double vz;
+            double vx;
+            double vy;
+        };
+        gv_sgf_t gv_sgf_;
 
         void init();
         Q_t setQd();                              // discrete process noise matrix

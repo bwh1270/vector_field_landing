@@ -11,7 +11,13 @@ topicname_(topicname)
     nh_private_.param<double>("meas_uncertainty", _meas_cov, 0.014);
     nh_private_.param<double>("gv_z_alpha", gv_.alpha, 1.0);
     nh_private_.param<bool>("delay_compensation", _delay_compensation, false);
-
+    
+    nh_private_.param<bool>("savitzky_golay_filter_z",   _z_sg_filter, false);
+    nh_private_.param<bool>("savitzky_golay_filter_xy", _xy_sg_filter, false);
+    nh_private_.param<int>("savitzky_golay_filter_window", gv_sgf_.window, 41);
+    nh_private_.param<int>("savitzky_golay_filter_poly",   gv_sgf_.poly, 1);
+    nh_private_.param<int>("savitzky_golay_filter_deriv",  gv_sgf_.deriv, 1);
+    ROS_INFO("Savitzky Golay filter will use [%.4f] sec window", gv_sgf_.window * _dt);
 
     sub_pose_tag_tf_   = nh_.subscribe("/aims/" + topicname_, 1, &EstimationTag::measureCb, this, ros::TransportHints().tcpNoDelay());
     // pub_odom_tag_esti_ = nh_.advertise<nav_msgs::Odometry>("/aims/" + topicname_ + "_esti", 5);
@@ -80,6 +86,8 @@ topicname_(topicname)
     gv_.z_meas = 0.;
     gv_.q << 1., 0., 0., 0.; 
 
+    gv_sgf_.coeffs = aims_fly::computeSavitzkyGolayCoefficients(gv_sgf_.window, gv_sgf_.poly, gv_sgf_.deriv);
+
     ROS_INFO("Ground Vehicle of %s Estimator is initialized...!", topicname_.c_str());
 }
 
@@ -143,6 +151,12 @@ void EstimationTag::publish(const esti_t &x_hat)
 {
     nav_msgs::Odometry odom_msg;
     odom_msg.pose.pose.position.z = gv_.z_esti;
+    if (_z_sg_filter) {
+        odom_msg.twist.twist.linear.z = gv_sgf_.vz;
+    } else {
+        odom_msg.twist.twist.linear.z = 0.0;
+    }
+    
     odom_msg.pose.pose.orientation.w = gv_.q(0);
     odom_msg.pose.pose.orientation.x = gv_.q(1);
     odom_msg.pose.pose.orientation.y = gv_.q(2);
@@ -152,6 +166,9 @@ void EstimationTag::publish(const esti_t &x_hat)
     if (_delay_compensation) {
         double now = ros::Time::now().toSec();
         double dt = now - header_.stamp.toSec();
+        if (dt > 0.5) {
+            dt = 0.5;
+        }
         int num_of_steps = static_cast<int>(dt / _dt);  
         
         esti_t _x_hat = x_hat_;
@@ -164,13 +181,23 @@ void EstimationTag::publish(const esti_t &x_hat)
         odom_msg.pose.pose.position.y = _x_hat.x(1);
         odom_msg.twist.twist.linear.x = _x_hat.x(2);
         odom_msg.twist.twist.linear.y = _x_hat.x(3);
+        
 
     } else {
         odom_msg.header = header_;
         odom_msg.pose.pose.position.x = x_hat.x(0);
         odom_msg.pose.pose.position.y = x_hat.x(1);
-        odom_msg.twist.twist.linear.x = x_hat.x(2);
-        odom_msg.twist.twist.linear.y = x_hat.x(3);
+
+        if (_xy_sg_filter) {
+            // SGF
+            odom_msg.twist.twist.linear.x = gv_sgf_.vx;
+            odom_msg.twist.twist.linear.y = gv_sgf_.vy;
+
+        } else { 
+            // LKF
+            odom_msg.twist.twist.linear.x = x_hat.x(2);
+            odom_msg.twist.twist.linear.y = x_hat.x(3);
+        }
     }
 
     pub_odom_tag_esti_.publish(odom_msg);
@@ -178,19 +205,54 @@ void EstimationTag::publish(const esti_t &x_hat)
 
 void EstimationTag::measureCb(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
+    double dt = ros::Time::now().toSec() - t_prev_;
+    if (dt >= _dt*10) {
+        ROS_WARN("Large interval measurements");
+        init();
+    } 
+    if (dt < aims_fly::N_EPS) {
+        ROS_WARN("Too small interval measurements");
+        dt = _dt;
+    }
+    t_prev_ = ros::Time::now().toSec();
+
+
     header_ = msg->header;
+
     gv_.z_meas = msg->pose.position.z;
     gv_.z_esti = gv_.z_esti + gv_.alpha * (gv_.z_meas - gv_.z_esti);
     gv_.q = quat2vec(msg->pose.orientation);
 
-    const double dt = ros::Time::now().toSec() - t_prev_;
-    if (dt >= _dt*10) {
-        init();
+    if (gv_sgf_.z.size() >= gv_sgf_.window) {
+        gv_sgf_.z.pop_front();
     }
-    t_prev_ = ros::Time::now().toSec();
+    gv_sgf_.z.push_back(gv_.z_meas);    
+
+    if (gv_sgf_.z.size() == gv_sgf_.window) {
+        gv_sgf_.vz = aims_fly::applySavitzkyGolay(gv_sgf_.z, gv_sgf_.coeffs, dt, gv_sgf_.deriv);
+    }
 
     // constant acceleration/velocity model w/o velocity measurements
     z_ << msg->pose.position.x, msg->pose.position.y;
+
+
+    if (gv_sgf_.x.size() >= gv_sgf_.window) {
+        gv_sgf_.x.pop_front();
+    }
+    gv_sgf_.x.push_back(z_(0));    
+
+    if (gv_sgf_.x.size() == gv_sgf_.window) {
+        gv_sgf_.vx = aims_fly::applySavitzkyGolay(gv_sgf_.x, gv_sgf_.coeffs, dt, gv_sgf_.deriv);
+    }
+
+    if (gv_sgf_.y.size() >= gv_sgf_.window) {
+        gv_sgf_.y.pop_front();
+    }
+    gv_sgf_.y.push_back(z_(1));    
+
+    if (gv_sgf_.y.size() == gv_sgf_.window) {
+        gv_sgf_.vy = aims_fly::applySavitzkyGolay(gv_sgf_.y, gv_sgf_.coeffs, dt, gv_sgf_.deriv);
+    }
 
     // // constant acceleration/velocity model w/ velocity measurements
     // z_ << msg->pose.pose.position.x, msg->pose.pose.position.y, msg->twist.twist.linear.x, msg->twist.twist.linear.y;

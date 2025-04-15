@@ -17,6 +17,7 @@ rostopic pub -r 20 /cmd_vel geometry_msgs/Twist "{linear: {x: 0.3, y: 0, z: 0}}"
 # Test
 rostopic pub -r 20 /aims/fractal_detections aims_als/Marker "{detect: true, pose_stmp: {header: {stamp: now, frame_id: 'map'}, pose: {position: {x: 0.0, y: 0.0, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}}"
 rostopic pub -r 20 /aims/transformed_marker aims_als/TFMarker "{status: true, pose_stmp: {header: {stamp: now, frame_id: 'map'}, pose: {position: {x: 0.0, y: 0.0, z: 0.0}, orientation: {x: 0.0, y: 0.0, z: 0.0, w: 1.0}}}}"
+rostopic pub -r 50 /aims/transformed_marker geometry_msgs/PoseStamped "{pose: {position: {x: 0, y: 0, z: 0}, orientation: {w: 0.7071, x: 0, y: 0.0, z: 0.7071}}}"
 
 # For Position Control
 rostopic pub -r 50 /aims/gv_esti nav_msgs/Odometry "{pose: {pose: {position: {x: 0, y: 0, z: 0}, orientation: {w: 0.7071, x: 0, y: 0.0, z: 0.7071}}}}"

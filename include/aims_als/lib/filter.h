@@ -38,6 +38,8 @@
 
 #include <iostream>
 #include <cmath>
+#include <vector>
+#include <deque>
 #include <eigen3/Eigen/Dense>
 
 namespace aims_fly
@@ -75,7 +77,50 @@ inline Eigen::Matrix<T, 3, 1> lpfv3(const Eigen::Matrix<T, 3, 1> &v, const T &al
     return v_f;
 }
 
+/**
+ * Savitzky-Golay Filter
+ */
 
+std::vector<double> computeSavitzkyGolayCoefficients(int window_size, int poly_order, int deriv_order) {
+    if (window_size % 2 == 0 || window_size <= poly_order) {
+        throw invalid_argument("Window size must be odd and greater than poly order.");
+    }
+
+    int half = window_size / 2;
+    Eigen::MatrixXd A(window_size, poly_order + 1);
+
+    // 디자인 행렬 A 생성
+    for (int i = -half; i <= half; ++i) {
+        for (int j = 0; j <= poly_order; ++j) {
+            A(i + half, j) = pow(i, j);
+        }
+    }
+
+    // (A^T * A)^-1 * A^T
+    Eigen::MatrixXd ATA_inv = (A.transpose() * A).inverse();
+    Eigen::MatrixXd pseudo_inv = ATA_inv * A.transpose();
+
+    // 도함수 차수에 해당하는 행 선택
+    Eigen::VectorXd coeffs = pseudo_inv.row(deriv_order);
+
+    return std::vector<double>(coeffs.data(), coeffs.data() + coeffs.size());
+}
+
+inline double applySavitzkyGolay(const std::deque<double> &x, const std::vector<double> &coeffs, double dt, int deriv_order)
+{
+    size_t window_size = coeffs.size();
+
+    if (x.size() != window_size) {
+        throw std::invalid_argument("Deque size must match coefficient size.");
+    }
+
+    double val = 0.0;
+    for (size_t i = 0; i < window_size; ++i) {
+        val += coeffs[i] * x[i];
+    }
+
+    return val / std::pow(dt, deriv_order);
+}
 
 };
 
