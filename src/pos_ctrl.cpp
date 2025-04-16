@@ -116,7 +116,7 @@ MAX_SIZE(20)
         } else {
             // header
             ROS_INFO("File is opened: %s", filename.c_str());
-            log_ << "time,uav_p_x,uav_p_y,uav_p_z,uav_v_x,uav_v_y,uav_v_z,uav_a_x,uav_a_y,uav_a_z,uav_head,gv_p_x,gv_p_y,gv_p_z,gv_v_x,gv_v_y,gv_head,cmd_v_x,cmd_v_y,cmd_v_z,cmd_int_v_x,cmd_int_v_y,cmd_int_v_z,cmd_a_x,cmd_a_y,cmd_a_z,uav_b3_e1,uav_b3_e2,uav_b3_e3,vf_h1,vf_h2\n";
+            log_ << "time,uav_p_x,uav_p_y,uav_p_z,uav_v_x,uav_v_y,uav_v_z,uav_a_x,uav_a_y,uav_a_z,uav_head,gv_p_x,gv_p_y,gv_p_z,gv_v_x,gv_v_y,gv_v_z,gv_head,cmd_v_x,cmd_v_y,cmd_v_z,cmd_int_v_x,cmd_int_v_y,cmd_int_v_z,cmd_a_x,cmd_a_y,cmd_a_z,uav_b3_e1,uav_b3_e2,uav_b3_e3,vf_h1,vf_h2\n";
         }
     }
 
@@ -388,7 +388,7 @@ void PositionControl::gvEstiCb(const nav_msgs::Odometry::ConstPtr &msg)
     }
     
     gv_.v = aims_fly::lpfv3(gv_.v, gv_.v_lpf_alpha, v_prev);
-    gv_.v(2) = 0.;
+    // gv_.v(2) = 0.;
 
     
 
@@ -597,9 +597,18 @@ Eigen::Vector3d PositionControl::calVFAccLaw()
     const double s = -vf_.k2 * tanh(rel_phi_err * vf_.c2) * rel_r;
     vf_.h << c, s;
     if (vf_.moving) {
-        Eigen::Vector2d gv_vxy(gv_.v(0), gv_.v(1));
-        gv_vxy = gv_vxy.dot(gv_.R.col(0))*gv_.R.col(0);
-        vf_.h = vf_.h + gv_vxy;
+        Eigen::Vector2d gv_v_lon(gv_.v(0), gv_.v(1));
+        const double gv_v_lon_scalar = gv_v_lon.dot(gv_.R.col(0));
+        
+        const double gv_phi = atan2(gv_v_lon_scalar, gv_.v(2));
+        
+        Eigen::Matrix2d R_rphi;
+        R_rphi << sin(gv_phi), -cos(gv_phi),
+                  cos(gv_phi), sin(gv_phi);
+        
+        const Eigen::Vector2d h_ff = R_rphi * Eigen::Vector2d(gv_v_lon_scalar, gv_.v(2));
+
+        vf_.h = vf_.h + h_ff;
     }
 
     Eigen::Matrix2d Ja_h;
@@ -777,7 +786,7 @@ void PositionControl::logging()
 {
     if (log_.is_open()) {
         log_ << std::fixed << std::setprecision(5);
-        log_ << ros::Time::now().toSec() << "," << uav_.p(0) << "," << uav_.p(1) << "," << uav_.p(2) << "," << uav_.v(0) << "," << uav_.v(1) << "," << uav_.v(2) << "," << uav_.a(0) << "," << uav_.a(1) << "," << uav_.a(2) << "," << uav_.head << "," << gv_.p(0) << "," << gv_.p(1) << "," << gv_.p(2) << "," << gv_.v(0) << "," << gv_.v(1) << "," << gv_.head << "," << cmd_.v(0) << "," << cmd_.v(1) << "," << cmd_.v(2) << "," << cmd_.int_v(0) << "," << cmd_.int_v(1) << "," << cmd_.int_v(2) << "," << cmd_.a(0) << "," << cmd_.a(1) << "," << cmd_.a(2) << "," << uav_.b3(0) << "," << uav_.b3(1) << "," << uav_.b3(2) << "," << vf_.h(0) << "," << vf_.h(1)  << "\n";
+        log_ << ros::Time::now().toSec() << "," << uav_.p(0) << "," << uav_.p(1) << "," << uav_.p(2) << "," << uav_.v(0) << "," << uav_.v(1) << "," << uav_.v(2) << "," << uav_.a(0) << "," << uav_.a(1) << "," << uav_.a(2) << "," << uav_.head << "," << gv_.p(0) << "," << gv_.p(1) << "," << gv_.p(2) << "," << gv_.v(0) << "," << gv_.v(1) << "," << gv_.v(2) << "," << gv_.head << "," << cmd_.v(0) << "," << cmd_.v(1) << "," << cmd_.v(2) << "," << cmd_.int_v(0) << "," << cmd_.int_v(1) << "," << cmd_.int_v(2) << "," << cmd_.a(0) << "," << cmd_.a(1) << "," << cmd_.a(2) << "," << uav_.b3(0) << "," << uav_.b3(1) << "," << uav_.b3(2) << "," << vf_.h(0) << "," << vf_.h(1)  << "\n";
     }
 }
 

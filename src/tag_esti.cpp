@@ -179,8 +179,19 @@ void EstimationTag::publish(const esti_t &x_hat)
         odom_msg.header.stamp = ros::Time::now();
         odom_msg.pose.pose.position.x = _x_hat.x(0);
         odom_msg.pose.pose.position.y = _x_hat.x(1);
-        odom_msg.twist.twist.linear.x = _x_hat.x(2);
-        odom_msg.twist.twist.linear.y = _x_hat.x(3);
+        // odom_msg.twist.twist.linear.x = _x_hat.x(2);
+        // odom_msg.twist.twist.linear.y = _x_hat.x(3);
+
+        if (_xy_sg_filter) {
+            // SGF
+            odom_msg.twist.twist.linear.x = gv_sgf_.vx;
+            odom_msg.twist.twist.linear.y = gv_sgf_.vy;
+
+        } else { 
+            // LKF
+            odom_msg.twist.twist.linear.x = x_hat.x(2);
+            odom_msg.twist.twist.linear.y = x_hat.x(3);
+        }
         
 
     } else {

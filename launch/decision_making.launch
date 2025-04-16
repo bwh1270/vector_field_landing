@@ -9,8 +9,8 @@
 
         <param name="epsilon_dt"          value="0.3"/>
         <param name="epsilon_angle"       value="7.5f"/>
-        <param name="epsilon_range"       value="5.0"/>
-        <param name="epsilon_speed"       value="5.0"/>
+        <param name="epsilon_range"       value="3.5"/>
+        <param name="epsilon_speed"       value="4.0"/>
         <param name="epsilon_swing_cnt"   value="2"/>
         <param name="epsilon_swing_angle" value="40."/>
 
@@ -20,6 +20,6 @@
         <param name="landing_condition_gv_speed" value="5.0"/>
         <param name="landing_condition_duration" value="4.0"/>
 
-        <param name="landed_condition_critical_altitude" value="0.325"/>
+        <param name="landed_condition_critical_altitude" value="0.19"/>
     </node>
 </launch>
