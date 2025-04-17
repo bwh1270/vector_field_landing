@@ -52,6 +52,7 @@ MAX_SIZE(20)
     nh_private_.param<double>("saturation_thrust_min", sat_.thr(0), 0.25);
     nh_private_.param<double>("saturation_thrust_max", sat_.thr(1), 0.65);
     nh_private_.param<double>("saturation_tilt", sat_.tilt, 40.);
+    sat_.tilt = aims_fly::deg2rad(sat_.tilt);
     nh_private_.param<double>("saturation_const_dt", sat_.dt, 1./50.);
     nh_private_.param<double>("saturation_vel_xy_max", sat_.vel_xy, 3.0);
     nh_private_.param<double>("saturation_vel_z_max", sat_.vel_z, 1.0);
@@ -60,11 +61,15 @@ MAX_SIZE(20)
     nh_private_.param<double>("saturation_no_meas_duration", sat_.T, 0.1);
     nh_private_.param<double>("saturation_critical_altitude", sat_.crt_alt, 0.35);
     nh_private_.param<double>("saturation_acc_ratio_for_land", sat_.acc_ratio, 0.5);
-    nh_private_.param<double>("saturation_land_point_altitude", sat_.land_pnt_alt, 0.30);
-
     assert(sat_.acc_ratio < 0.6);
-
-    sat_.tilt = aims_fly::deg2rad(sat_.tilt);
+    nh_private_.param<double>("saturation_land_point_altitude", sat_.land_pnt_alt, 0.0);
+    
+    if (sat_.land_pnt_alt >= 0.0) {
+        sat_.land_pnt_lon = 0.0;
+    } else {
+        sat_.land_pnt_lon = abs(sat_.land_pnt_alt * tan(abs(vf_.phi_des)));
+        ROS_INFO("Landing Point: [LON, ALT] = [%.2f, %.2f]", sat_.land_pnt_lon, sat_.land_pnt_alt);
+    }
     
 
     Eigen::Vector3d P,I,D;
@@ -346,13 +351,6 @@ void PositionControl::gvEstiCb(const nav_msgs::Odometry::ConstPtr &msg)
         ROS_DEBUG("dt is too large");
     }
 
-    gv_.p = point2vec(msg->pose.pose.position);
-    if (flag_.sitl) {
-        gv_.p(2) = gv_.p(2) + 0.15;
-    } else {
-        gv_.p(2) = gv_.p(2) + sat_.land_pnt_alt;
-    }
-
     const Eigen::Vector4d q = quat2vec(msg->pose.pose.orientation);
     const Eigen::Matrix3d R = q2R(q);
     const double head_prev = gv_.head;
@@ -361,6 +359,15 @@ void PositionControl::gvEstiCb(const nav_msgs::Odometry::ConstPtr &msg)
     //           lon              lat
     gv_.R << cos(gv_.head), -sin(gv_.head),
              sin(gv_.head),  cos(gv_.head);
+
+    gv_.p = point2vec(msg->pose.pose.position);
+    if (flag_.sitl) {
+        gv_.p(2) = gv_.p(2) + 0.15;
+    } else {
+        gv_.p(0) = gv_.p(0) + sat_.land_pnt_lon * cos(gv_.head);
+        gv_.p(1) = gv_.p(1) + sat_.land_pnt_lon * sin(gv_.head); 
+        gv_.p(2) = gv_.p(2) + sat_.land_pnt_alt;
+    }
 
     
     const Eigen::Vector3d v_prev = gv_.v;
@@ -596,17 +603,17 @@ Eigen::Vector3d PositionControl::calVFAccLaw()
     const double c = -vf_.k1 * exp(-pow((rel_phi_err / vf_.c1), vf_.n1)) * pow(rel_r, 1./vf_.n2);
     const double s = -vf_.k2 * tanh(rel_phi_err * vf_.c2) * rel_r;
     vf_.h << c, s;
+
     if (vf_.moving) {
-        Eigen::Vector2d gv_v_lon(gv_.v(0), gv_.v(1));
-        const double gv_v_lon_scalar = gv_v_lon.dot(gv_.R.col(0));
+        Eigen::Vector2d gv_v_xy(gv_.v(0), gv_.v(1));
+        const double gv_v_lon = gv_v_xy.dot(gv_.R.col(0));
+        const double gv_phi = atan2(gv_v_lon, gv_.v(2));
+
+        Eigen::Matrix2d _R;
+        _R << sin(gv_phi), cos(gv_phi),
+              cos(gv_phi), -sin(gv_phi);
         
-        const double gv_phi = atan2(gv_v_lon_scalar, gv_.v(2));
-        
-        Eigen::Matrix2d R_rphi;
-        R_rphi << sin(gv_phi), -cos(gv_phi),
-                  cos(gv_phi), sin(gv_phi);
-        
-        const Eigen::Vector2d h_ff = R_rphi * Eigen::Vector2d(gv_v_lon_scalar, gv_.v(2));
+        const Eigen::Vector2d h_ff = _R * Eigen::Vector2d(gv_v_lon, gv_.v(2));
 
         vf_.h = vf_.h + h_ff;
     }
@@ -620,10 +627,12 @@ Eigen::Vector3d PositionControl::calVFAccLaw()
 
     Eigen::Vector2d a_law = -vf_.gamma * (rel_.eta_dot - vf_.h) + h_dot;  // (er, e\phi)
     
+    // r-phi <-> x_lon-z
     const double phi = rel_phi_err + vf_.phi_des;
     Eigen::Matrix2d R_inv;
     R_inv << sin(phi), cos(phi),
              cos(phi), -sin(phi);
+    
     a_law = R_inv * a_law;                                                                      // (xy_lon, z)
 
     vf_.a_law = Eigen::Vector3d(a_law(0) * cos(gv_.head), a_law(0) * sin(gv_.head), a_law(1));  // (x, y, z)
@@ -721,7 +730,7 @@ void PositionControl::monitor(const ros::TimerEvent &event)
         }
 
         ROS_INFO("To critical altitude: %.2f", abs(rel_.p.norm()) - sat_.crt_alt);
-        if ((abs(rel_.p.norm()) < sat_.crt_alt) && (flag_.landed == false)) {
+        if ((abs(rel_.p.norm()) < (sat_.crt_alt - sat_.land_pnt_alt)) && (flag_.landed == false)) {
             flag_.landed = true;
             sat_.t = ros::Time::now().toSec();
             sat_.t_end = sqrt(2. * sat_.crt_alt * cmd_.thr_l);

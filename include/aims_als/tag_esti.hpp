@@ -21,9 +21,9 @@
 
 using namespace aims_fly;
 
-using lkf_t = LKF<6,1,2>;    // constant acceleration w/o velocity measurement
+// using lkf_t = LKF<6,1,2>;    // constant acceleration w/o velocity measurement
 // using lkf_t = LKF<6,1,4>;    // constant acceleration w/ velocity measurement
-// using lkf_t = LKF<4,1,2>;    // constant velocity w/o velocity measurement
+using lkf_t = LKF<4,1,2>;    // constant velocity w/o velocity measurement
 // using lkf_t = LKF<4,1,4>;    // constant velocity w/ velocity measurement
 
 using x_t = typename lkf_t::x_t;
@@ -55,6 +55,7 @@ class EstimationTag
 
         std::string topicname_;
         bool _delay_compensation;
+        int _delay_comp_steps;
         bool _z_sg_filter;
         bool _xy_sg_filter;
         

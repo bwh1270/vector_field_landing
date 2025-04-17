@@ -5,10 +5,10 @@ windows:
   - main:
       layout: tiled
       panes:
-        - waitForRos; roslaunch aims_als real_world.launch
-        - cam_auto; roslaunch aims_als perception.launch
+        - roslaunch aims_als real_world.launch
+        - cam_auto; waitForRos; roslaunch aims_als perception.launch
         - waitForRos; sleep 5; roslaunch aims_als decision_making.launch
-        - waitForRos; spi; sleep 10; roslaunch aims_als controller.launch
+        - spi; waitForRos; sleep 10; roslaunch aims_als controller.launch
 
   - monitor:
       layout: tiled

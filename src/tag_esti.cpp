@@ -9,8 +9,14 @@ topicname_(topicname)
     nh_private_.param<double>("initial_state_uncertainty", _P0, 500.);
     nh_private_.param<double>("model_acc_uncertainty", _acc_cov, 10.);
     nh_private_.param<double>("meas_uncertainty", _meas_cov, 0.014);
+    
+    nh_private_.param<bool>("delay_compensation",    _delay_compensation, false);
+    nh_private_.param<int>("delay_compensation_steps", _delay_comp_steps, 0);
+    if ((_delay_compensation) && (_delay_comp_steps == 0)) {
+        ROS_INFO("Delay compensation steps are computed automatically");
+    }
+
     nh_private_.param<double>("gv_z_alpha", gv_.alpha, 1.0);
-    nh_private_.param<bool>("delay_compensation", _delay_compensation, false);
     
     nh_private_.param<bool>("savitzky_golay_filter_z",   _z_sg_filter, false);
     nh_private_.param<bool>("savitzky_golay_filter_xy", _xy_sg_filter, false);
@@ -25,40 +31,40 @@ topicname_(topicname)
 
     
     F_t F; 
-    F << 1, 0, _dt,  0, 0.5*(_dt*_dt),             0,  // constant acceleration model
-         0, 1,  0, _dt,             0, 0.5*(_dt*_dt),
-         0, 0,  1,   0,           _dt,             0,
-         0, 0,  0,   1,             0,           _dt,
-         0, 0,  0,   0,             1,             0,
-         0, 0,  0,   0,             0,             1;
-    // F << 1, 0, _dt,  0,                                // constant velocity model
-    //      0, 1,  0, _dt,            
-    //      0, 0,  1,   0,           
-    //      0, 0,  0,   1;                 
+    // F << 1, 0, _dt,  0, 0.5*(_dt*_dt),             0,  // constant acceleration model
+    //      0, 1,  0, _dt,             0, 0.5*(_dt*_dt),
+    //      0, 0,  1,   0,           _dt,             0,
+    //      0, 0,  0,   1,             0,           _dt,
+    //      0, 0,  0,   0,             1,             0,
+    //      0, 0,  0,   0,             0,             1;
+    F << 1, 0, _dt,  0,                                // constant velocity model
+         0, 1,  0, _dt,            
+         0, 0,  1,   0,           
+         0, 0,  0,   1;                 
 
 
     G_t G; 
-    G << 0,                                            // constant acceleration model
-         0,
-         0, 
-         0, 
-         0, 
-         0;
-    // G << 0,                                            // constant velocity model
+    // G << 0,                                            // constant acceleration model
     //      0,
     //      0, 
-    //      0; 
+    //      0, 
+    //      0, 
+    //      0;
+    G << 0,                                            // constant velocity model
+         0,
+         0, 
+         0; 
 
 
     H_t H;
-    H << 1, 0, 0, 0, 0, 0,                             // constant acceleration model
-         0, 1, 0, 0, 0, 0; 
+    // H << 1, 0, 0, 0, 0, 0,                             // constant acceleration model
+    //      0, 1, 0, 0, 0, 0; 
     // H << 1, 0, 0, 0, 0, 0,                                // constant acceleration model w/ velocity measurements
     //      0, 1, 0, 0, 0, 0,
     //      0, 0, 1, 0, 0, 0,
     //      0, 0, 0, 1, 0, 0;
-    // H << 1, 0, 0, 0,                                      // constant velocity model
-    //      0, 1, 0, 0; 
+    H << 1, 0, 0, 0,                                      // constant velocity model
+         0, 1, 0, 0; 
     // H << 1, 0, 0, 0,                                      // constant velocity model w/ velocity measurements
     //      0, 1, 0, 0,
     //      0, 0, 1, 0,
@@ -107,41 +113,41 @@ Q_t EstimationTag::setQd()
 {
     Q_t Qd = Q_t::Zero();
 
-    Qd(0,0) = pow(_dt,4) / 4.;                            // constant acceleration model
-    Qd(0,2) = pow(_dt,3) / 2.;
-    Qd(0,4) = pow(_dt,2) / 2.;
-
-    Qd(1,1) = pow(_dt,4) / 4.;
-    Qd(1,3) = pow(_dt,3) / 2.;
-    Qd(1,5) = pow(_dt,2) / 2.;
-
-    Qd(2,0) = pow(_dt,3) / 2.;
-    Qd(2,2) = pow(_dt,2);
-    Qd(2,4) = _dt;
-
-    Qd(3,1) = pow(_dt,3) / 2.;
-    Qd(3,3) = pow(_dt,2);
-    Qd(3,5) = _dt;
-	
-    Qd(4,0) = pow(_dt,2) / 2.;
-    Qd(4,2) = _dt;
-    Qd(4,4) = 1.;
-
-    Qd(5,1) = pow(_dt,2) /2.;
-    Qd(5,3) = _dt;
-    Qd(5,5) = 1.;
-
-    // Qd(0,0) = pow(_dt,4) / 4.;                            // constant velocity model
+    // Qd(0,0) = pow(_dt,4) / 4.;                            // constant acceleration model
     // Qd(0,2) = pow(_dt,3) / 2.;
+    // Qd(0,4) = pow(_dt,2) / 2.;
 
     // Qd(1,1) = pow(_dt,4) / 4.;
     // Qd(1,3) = pow(_dt,3) / 2.;
+    // Qd(1,5) = pow(_dt,2) / 2.;
 
     // Qd(2,0) = pow(_dt,3) / 2.;
     // Qd(2,2) = pow(_dt,2);
+    // Qd(2,4) = _dt;
 
     // Qd(3,1) = pow(_dt,3) / 2.;
     // Qd(3,3) = pow(_dt,2);
+    // Qd(3,5) = _dt;
+	
+    // Qd(4,0) = pow(_dt,2) / 2.;
+    // Qd(4,2) = _dt;
+    // Qd(4,4) = 1.;
+
+    // Qd(5,1) = pow(_dt,2) /2.;
+    // Qd(5,3) = _dt;
+    // Qd(5,5) = 1.;
+
+    Qd(0,0) = pow(_dt,4) / 4.;                            // constant velocity model
+    Qd(0,2) = pow(_dt,3) / 2.;
+
+    Qd(1,1) = pow(_dt,4) / 4.;
+    Qd(1,3) = pow(_dt,3) / 2.;
+
+    Qd(2,0) = pow(_dt,3) / 2.;
+    Qd(2,2) = pow(_dt,2);
+
+    Qd(3,1) = pow(_dt,3) / 2.;
+    Qd(3,3) = pow(_dt,2);
 
     Qd *= _acc_cov;
     return Qd;
@@ -169,7 +175,14 @@ void EstimationTag::publish(const esti_t &x_hat)
         if (dt > 0.5) {
             dt = 0.5;
         }
-        int num_of_steps = static_cast<int>(dt / _dt);  
+
+        int num_of_steps = 0;
+        if (_delay_comp_steps == 0) {
+            num_of_steps = static_cast<int>(dt / _dt) + 1;  
+        } else {
+            num_of_steps = _delay_comp_steps;
+        }
+        
         
         esti_t _x_hat = x_hat_;
         for (int i=0; i<num_of_steps; ++i) {
@@ -179,8 +192,6 @@ void EstimationTag::publish(const esti_t &x_hat)
         odom_msg.header.stamp = ros::Time::now();
         odom_msg.pose.pose.position.x = _x_hat.x(0);
         odom_msg.pose.pose.position.y = _x_hat.x(1);
-        // odom_msg.twist.twist.linear.x = _x_hat.x(2);
-        // odom_msg.twist.twist.linear.y = _x_hat.x(3);
 
         if (_xy_sg_filter) {
             // SGF
@@ -234,6 +245,7 @@ void EstimationTag::measureCb(const geometry_msgs::PoseStamped::ConstPtr &msg)
     gv_.z_esti = gv_.z_esti + gv_.alpha * (gv_.z_meas - gv_.z_esti);
     gv_.q = quat2vec(msg->pose.orientation);
 
+    // Vz
     if (gv_sgf_.z.size() >= gv_sgf_.window) {
         gv_sgf_.z.pop_front();
     }
@@ -246,7 +258,7 @@ void EstimationTag::measureCb(const geometry_msgs::PoseStamped::ConstPtr &msg)
     // constant acceleration/velocity model w/o velocity measurements
     z_ << msg->pose.position.x, msg->pose.position.y;
 
-
+    // Vx
     if (gv_sgf_.x.size() >= gv_sgf_.window) {
         gv_sgf_.x.pop_front();
     }
@@ -256,6 +268,7 @@ void EstimationTag::measureCb(const geometry_msgs::PoseStamped::ConstPtr &msg)
         gv_sgf_.vx = aims_fly::applySavitzkyGolay(gv_sgf_.x, gv_sgf_.coeffs, dt, gv_sgf_.deriv);
     }
 
+    // Vy
     if (gv_sgf_.y.size() >= gv_sgf_.window) {
         gv_sgf_.y.pop_front();
     }

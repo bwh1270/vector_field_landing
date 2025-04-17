@@ -34,17 +34,18 @@
         <param name="serial_port"        value="/dev/gimbal"/>
         <param name="baud_rate"          value="115200"/>
         <param name="debug"              value="$(arg debug)"/>
-        <param name="init_pitch"         value="-90.0"/>
-        <param name="pitch_margin_ratio" value="0.10"/>
+        <param name="init_pitch"         value="-45.0"/>
+        <param name="pitch_margin_ratio" value="0.15"/>
     </node>
 
     <node pkg="$(arg ros_pkg)" name="tag_esti_node" type="tag_esti_exe" output="screen">
         <param name="sample_time"               value="0.02" />
         <param name="initial_state_uncertainty" value="500" />
-        <param name="model_acc_uncertainty"     value="0.1" />
-        <param name="meas_uncertainty"          value="0.0005" />
-        <param name="gv_z_alpha"             value="0.3" />
-        <param name="delay_compensation"     value="true" />
+        <param name="model_acc_uncertainty"     value="0.05" />
+        <param name="meas_uncertainty"          value="0.005" />
+        <param name="delay_compensation"       value="true" />
+        <param name="delay_compensation_steps" value="0" />
+        <param name="gv_z_alpha" value="0.3" />
         <param name="savitzky_golay_filter_z"      value="true" />
         <param name="savitzky_golay_filter_xy"     value="true" />
         <param name="savitzky_golay_filter_window" value="81" />

@@ -32,8 +32,8 @@
         <param name="vf_phi_des"   value="-27.5" />
         <param name="vf_phi_delta" value="34.375" />
         <param name="vf_r_max"     value="5.0" />
-        <param name="vf_k1"        value="0.35" />
-        <param name="vf_k2"        value="0.30" />
+        <param name="vf_k1"        value="0.25" />
+        <param name="vf_k2"        value="0.25" />
         <param name="vf_margin"    value="17.1888" />
         <param name="vf_c1"        value="8.5" />
         <param name="vf_c2"        value="2.0" />
@@ -51,8 +51,8 @@
         <param name="saturation_integral_vel_xy_max" value="5.0" />
         <param name="saturation_integral_vel_z_max"  value="3.0" />
         <param name="saturation_no_meas_duration"    value="0.1" />
-        <param name="saturation_critical_altitude"   value="0.225" />
-        <param name="saturation_land_point_altitude" value="0.20" />
+        <param name="saturation_critical_altitude"   value="0.25" />
+        <param name="saturation_land_point_altitude" value="-0.1" />
 
 
         <param name="vx_kp" value="2.2" />

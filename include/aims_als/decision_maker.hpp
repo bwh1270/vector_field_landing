@@ -129,7 +129,8 @@ class DecisionMaker
 
         struct err_eps_t {
             double dt;    // detection failure timeout
-            float angle;  // angle
+            float roll;  // angle
+            float pan;
             double r;     // range
             double s;     // speed
             int cnt;  // swing counter
@@ -141,7 +142,7 @@ class DecisionMaker
             int num_of_sat;  // # of satisfied conditions
             bool detected;
             double t0;
-            Eigen::Vector2f gimbal_angles;
+            Eigen::Vector3f gimbal_angles;
             double r;
             double s;
             int cnt;

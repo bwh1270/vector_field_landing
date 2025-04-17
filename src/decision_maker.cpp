@@ -11,7 +11,8 @@ nh_(nh), nh_private_(nh_private)
     nh_private_.param<bool>("sitl", _sitl, false);
 
     nh_private_.param<double>("epsilon_dt", err_eps_.dt, 0.1);
-    nh_private_.param<float>("epsilon_angle", err_eps_.angle, 10.f);
+    nh_private_.param<float>("epsilon_roll", err_eps_.roll, 10.f);
+    nh_private_.param<float>("epsilon_pan", err_eps_.pan, 10.f);
     nh_private_.param<double>("epsilon_range", err_eps_.r, 5.0);
     nh_private_.param<double>("epsilon_speed", err_eps_.s, 4.0);
     nh_private_.param<int>("epsilon_swing_cnt", err_eps_.cnt, 3);
@@ -86,7 +87,7 @@ void DecisionMaker::initErrCond()
     err_cond_.num_of_sat = 0;
     err_cond_.detected = false;
     err_cond_.t0 = 0.;
-    err_cond_.gimbal_angles << 0.f, 0.f;
+    err_cond_.gimbal_angles << 0.f, 0.f, 0.f;
     err_cond_.r = 0.;
     err_cond_.s = 0.;
     err_cond_.cnt = 0;
@@ -102,6 +103,7 @@ void DecisionMaker::gimbalAngleCb(const geometry_msgs::PointStamped::ConstPtr &m
 {
     err_cond_.gimbal_angles(0) = msg->point.x;  // roll
     err_cond_.gimbal_angles(1) = msg->point.y;  // pitch(tilt)
+    err_cond_.gimbal_angles(2) = msg->point.z;  // pan (calibrated)
 }
 
 void DecisionMaker::uavPoseCb(const geometry_msgs::PoseStamped::ConstPtr &msg)
@@ -291,10 +293,10 @@ bool DecisionMaker::checkErrorConditions()
     ++err_cond_.num_of_sat;
 
     // 2. Gimbal shutdown [deg]
-    const float diff_angle = abs(err_cond_.gimbal_angles(0));
-    assert(diff_angle>=0);
-
-    if (diff_angle > err_eps_.angle) {
+    const float diff_roll = abs(err_cond_.gimbal_angles(0));
+    const float diff_pan  = abs(err_cond_.gimbal_angles(2));
+    
+    if ((diff_roll > err_eps_.roll) || (diff_pan > err_eps_.pan)) {
         ROS_WARN("Gimbal might be shutdown");
         return false;
     }

@@ -35,6 +35,9 @@ class GimbalControl:
         self.init_roll_ = 0
         self.init_tilt_ = 0
         self.init_pan_ = 0
+        self.g_pan_before_init = True
+        self.g_pan_init_ = 0
+        self.b_pan_init_ = 0
 
         self.detected_ = False
 
@@ -121,12 +124,12 @@ class GimbalControl:
         self.t0_ = 0.0
 
         # Parameters
-        _loop_rate = rospy.get_param('~loop_rate',       50.0)
+        self._loop_rate = rospy.get_param('~loop_rate',  50.0)
         _port = rospy.get_param('~serial_port', '/dev/gimbal')
+        self._init_pitch = rospy.get_param('~init_pitch', 0.0)
         _baud_rate = rospy.get_param('~baud_rate',     115200)
         self._debug = rospy.get_param('~debug',         False)
 
-        self._init_pitch = rospy.get_param('~init_pitch', 0.0)
         _vfov = rospy.get_param('/vfov', 43.75)
         _pitch_margin_ratio = rospy.get_param('~pitch_margin_ratio', 0.5)
         self.vfov_margin = np.deg2rad(_vfov*_pitch_margin_ratio)
@@ -140,7 +143,7 @@ class GimbalControl:
             raise
 
         # Set Loop Rate
-        self.rate_ = rospy.Rate(_loop_rate) 
+        self.rate_ = rospy.Rate(self._loop_rate) 
 
         # ROS
         self.pub_transformed_marker_ = rospy.Publisher('/aims/transformed_marker', PoseStamped, queue_size=1)
@@ -267,7 +270,7 @@ class GimbalControl:
         roll = 256 + roll if roll < 0 else roll
         tilt = 256 + tilt if tilt < 0 else tilt
         pan  = 256 + pan if pan < 0 else pan
-        cmd = [92, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 100, 200, 100, 0, 0, 10, 138, 90, 166, roll, tilt, pan, 40, 35, 40, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        cmd = [92, 110, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 1, 0, 100, 200, 100, 0, 0, 10, 138, 90, 166, roll, tilt, pan, 40, 30, 40, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         cmd_with_crc = self.appendCRC(cmd)
         self.transmitData(cmd_with_crc)
     
@@ -307,6 +310,7 @@ class GimbalControl:
 
 
     def q2R(self, q: np.ndarray) -> np.ndarray:
+        q = q / np.linalg.norm(q)
         R = np.zeros((3, 3))
         qq = q ** 2
 
@@ -362,7 +366,7 @@ class GimbalControl:
         self.qW_B_ = np.array([msg.pose.orientation.w, msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z])
         self.R_WB_ = self.q2R(self.qW_B_)
         
-        self.uav_dq.append([rospy.Time.now().to_sec(), self.pW_B_, self.R_WB_])
+        self.uav_dq.append([msg.header.stamp.to_sec(), self.pW_B_, self.R_WB_])
         if (len(self.uav_dq) >= 20):
             self.uav_dq.popleft()
 
@@ -436,7 +440,7 @@ class GimbalControl:
 
         # Clamping
         phi_cmd = 0  #self.clamp(phi_cmd, -25, 25)
-        theta_cmd = self.clamp(theta_cmd, -115, -5)  # real limit[-115,10]
+        theta_cmd = self.clamp(theta_cmd, -100, -5)  # real limit[-115,10]
 
         # @debug
         # print(theta_des, self.theta_des_old_, theta_cmd)
@@ -452,7 +456,8 @@ class GimbalControl:
     def run(self):
         request_iter = 0
         ref_roll, ref_tilt, ref_pan = 0, self._init_pitch, 0
-        
+        ctrl_loop_iter = 0
+
         try:
             while not rospy.is_shutdown():
                 
@@ -469,15 +474,34 @@ class GimbalControl:
                 elif request_iter == len(self.init_cmd_):
                     request_iter += 1
                     request_iter = self.requestInit(request_iter)
+                    self.g_pan_init_ = gimbal_pan 
+                    self.b_pan_init_ = np.rad2deg(self.R2E(self.R_WB_)[-1])
                     print("Gimbal initialization complete !!")
 
                 else:
                     self.request(ref_roll, ref_tilt, ref_pan)
- 
+
                     if (gimbal_roll is not None) and (self.detected_):
 
                         # Gimbal control
+                        # if ((self.g_pan_before_init) and (abs(ref_tilt - gimbal_tilt) <= 3)) :
+                        #     print(gimbal_tilt)
+                        #     print(gimbal_pan)
+                        #     self.g_pan_init_ = gimbal_pan 
+                        #     self.g_pan_before_init = False
+
+
+                        # dt_lst = [abs(rospy.Time.now().to_sec() - x[0]) for x in self.uav_dq]
+                        # kdx = dt_lst.index(min(dt_lst))
+                        # R_WB = self.uav_dq[kdx][-1]
+                        # print(kdx)
+                        # b_pan = np.rad2deg(self.R2E(R_WB)[-1])
+                        # g_pan = (gimbal_pan - self.g_pan_init_) - (b_pan - self.b_pan_init_)
+                        # print(self.b_pan_init_, b_pan)
+                        # print(self.g_pan_init_, g_pan)
+
                         R_GS = self.gimbalE2R(np.deg2rad(gimbal_roll), np.deg2rad(gimbal_tilt), 0)
+                        
 
                         self.R_GS_dq.append([rospy.Time.now().to_sec(), R_GS])
                         if (len(self.R_GS_dq) >= 20):
@@ -517,6 +541,11 @@ class GimbalControl:
                         R_WB = self.uav_dq[jdx][-1]
                         pW_B = self.uav_dq[jdx][1]
 
+                        # print(f"pC_M: {self.pC_M_}")
+                        # print(f"pG_M: {R_GS @ (self.R_SC_ @ self.pC_M_)}")
+                        # print(f"pB_M: {self.R_BG_ @ (R_GS @ (self.R_SC_ @ self.pC_M_)) + self.tB_G_}")
+                        # print(f"pW_M: {R_WB @ (self.R_BG_ @ (R_GS @ (self.R_SC_ @ self.pC_M_)) + self.tB_G_) + pW_B}")
+                        # print(R_WB)
                         pW_M = R_WB @ (self.R_BG_ @ (R_GS @ (self.R_SC_ @ self.pC_M_)) + self.tB_G_) + pW_B
                         qW_M = self.R2q(R_WB @ (self.R_BG_ @ (R_GS @ (self.R_SC_ @ self.R_CM_))))
                         
@@ -538,7 +567,16 @@ class GimbalControl:
                         gimbal_angles.header = transformed_marker.header
                         gimbal_angles.point.x = gimbal_roll
                         gimbal_angles.point.y = gimbal_tilt
+                        gimbal_angles.point.z =  self.g_pan_init_ - gimbal_pan
                         self.pub_gimbal_angle_.publish(gimbal_angles)
+                        
+                        # update
+                        if (ctrl_loop_iter % 25 == 0):
+                            self.g_pan_init_ = gimbal_pan
+                            ctrl_loop_iter = 0
+
+                        ctrl_loop_iter += 1
+                
                 
                 self.rate_.sleep()
 
