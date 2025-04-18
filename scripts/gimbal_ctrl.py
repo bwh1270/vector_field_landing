@@ -370,6 +370,35 @@ class GimbalControl:
         if (len(self.uav_dq) >= 20):
             self.uav_dq.popleft()
 
+    def get_yaw_only_projection(self, R):
+        # Extract yaw angle (Z-Y-X convention)
+        yaw = np.arctan2(R[1, 0], R[0, 0])
+        
+        # Construct yaw-only rotation matrix
+        R_proj = np.array([
+            [np.cos(yaw), -np.sin(yaw), 0],
+            [np.sin(yaw),  np.cos(yaw), 0],
+            [0,            0,           1]
+        ])
+    
+        return R_proj
+
+    def remove_roll(self, R):
+        # Extract pitch and yaw from rotation matrix (Z-Y-X order)
+        theta = np.arcsin(-R[2, 0])  # pitch
+        psi = np.arctan2(R[1, 0], R[0, 0])  # yaw
+        
+        # Reconstruct R_proj = Rz(yaw) * Ry(pitch)
+        cy, sy = np.cos(psi), np.sin(psi)
+        cp, sp = np.cos(theta), np.sin(theta)
+
+        R_proj = np.array([
+            [cy * cp, -sy, cy * sp],
+            [sy * cp,  cy, sy * sp],
+            [-sp,     0,    cp]
+        ])
+        
+        return R_proj
 
     def markerCb(self, msg):
         detected = msg.detect
@@ -377,6 +406,7 @@ class GimbalControl:
             self.pC_M_ = np.array([msg.pose_stmp.pose.position.x, msg.pose_stmp.pose.position.y, msg.pose_stmp.pose.position.z])
             qC_M_ = np.array([msg.pose_stmp.pose.orientation.w, msg.pose_stmp.pose.orientation.x, msg.pose_stmp.pose.orientation.y, msg.pose_stmp.pose.orientation.z])
             self.R_CM_ = self.q2R(qC_M_)
+            # self.R_CM_ = self.remove_roll(self.R_CM_)
 
             self.detected_ = True
             self.img_header = msg.pose_stmp.header
@@ -484,23 +514,24 @@ class GimbalControl:
                     if (gimbal_roll is not None) and (self.detected_):
 
                         # Gimbal control
-                        # if ((self.g_pan_before_init) and (abs(ref_tilt - gimbal_tilt) <= 3)) :
-                        #     print(gimbal_tilt)
-                        #     print(gimbal_pan)
-                        #     self.g_pan_init_ = gimbal_pan 
-                        #     self.g_pan_before_init = False
+                        if ((self.g_pan_before_init) and (abs(ref_tilt - gimbal_tilt) <= 3)) :
+                            print(f'First: {self.g_pan_init_}')
+                            print(f'Update: {gimbal_pan}')
+                            self.g_pan_init_ = gimbal_pan 
+                            self.g_pan_before_init = False
 
 
-                        # dt_lst = [abs(rospy.Time.now().to_sec() - x[0]) for x in self.uav_dq]
-                        # kdx = dt_lst.index(min(dt_lst))
-                        # R_WB = self.uav_dq[kdx][-1]
-                        # print(kdx)
-                        # b_pan = np.rad2deg(self.R2E(R_WB)[-1])
-                        # g_pan = (gimbal_pan - self.g_pan_init_) - (b_pan - self.b_pan_init_)
-                        # print(self.b_pan_init_, b_pan)
-                        # print(self.g_pan_init_, g_pan)
+                        dt_lst = [abs(rospy.Time.now().to_sec() - x[0]) for x in self.uav_dq]
+                        kdx = dt_lst.index(min(dt_lst))
+                        R_WB = self.uav_dq[kdx][-1]
+                        b_pan = np.rad2deg(self.R2E(R_WB)[-1])
+                        # print(self.b_pan_init_)
+                        # print(b_pan)
+                        # print(self.g_pan_init_ - (b_pan - self.b_pan_init_))
+                        # print(gimbal_pan)
+                        gimbal_pan = gimbal_pan - (self.g_pan_init_ - (b_pan - self.b_pan_init_))
 
-                        R_GS = self.gimbalE2R(np.deg2rad(gimbal_roll), np.deg2rad(gimbal_tilt), 0)
+                        R_GS = self.gimbalE2R(np.deg2rad(gimbal_roll), np.deg2rad(gimbal_tilt), np.deg2rad(gimbal_pan))
                         
 
                         self.R_GS_dq.append([rospy.Time.now().to_sec(), R_GS])
@@ -571,9 +602,9 @@ class GimbalControl:
                         self.pub_gimbal_angle_.publish(gimbal_angles)
                         
                         # update
-                        if (ctrl_loop_iter % 25 == 0):
-                            self.g_pan_init_ = gimbal_pan
-                            ctrl_loop_iter = 0
+                        # if (ctrl_loop_iter % 100 == 0):
+                        #     self.g_pan_init_ = gimbal_pan
+                        #     ctrl_loop_iter = 0
 
                         ctrl_loop_iter += 1
                 
