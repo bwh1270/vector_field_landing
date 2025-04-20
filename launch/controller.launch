@@ -58,7 +58,6 @@
         <param name="vf_moving"    value="false" />
 
 
-
         <param name="saturation_thrust_min"          value="0.35" />
         <param name="saturation_thrust_max"          value="0.65" />
         <param name="saturation_tilt"                value="40.0" />
@@ -69,7 +68,7 @@
         <param name="saturation_integral_vel_z_max"  value="3.0" />
         <param name="saturation_no_meas_duration"    value="0.1" />
         <param name="saturation_critical_altitude"   value="0.25" />
-        <param name="saturation_land_point_altitude" value="-0.1" />
+        <param name="saturation_land_point_altitude" value="-0.125" />
 
 
         <param name="vx_kp" value="2.2" />

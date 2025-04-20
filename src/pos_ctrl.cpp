@@ -370,7 +370,29 @@ void PositionControl::gvEstiCb(const nav_msgs::Odometry::ConstPtr &msg)
 
     gv_.p = point2vec(msg->pose.pose.position);
     if (flag_.sitl) {
-        gv_.p(2) = gv_.p(2) + 0.15;
+        gv_.p(2) = gv_.p(2) + 0.05;
+
+        gv_.p(0) = gv_.p(0) + sat_.land_pnt_lon * cos(gv_.head);
+        gv_.p(1) = gv_.p(1) + sat_.land_pnt_lon * sin(gv_.head); 
+        gv_.p(2) = gv_.p(2) + sat_.land_pnt_alt;
+
+        // Gaussian Noise (sigma)
+        const double sigma = 0.05;
+
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::normal_distribution<double> dist(0.0, sigma);
+
+        Eigen::Vector3d noise;
+        noise << dist(gen), dist(gen), dist(gen);
+
+        // std::cout << "UAV: "   << uav_.p(2) << std::endl;
+        // std::cout << "GV: "    << gv_.p(2) << std::endl;
+        // std::cout << "Noise: " << noise(2) << std::endl;
+
+        gv_.p = gv_.p + noise;
+
+
     } else {
         gv_.p(0) = gv_.p(0) + sat_.land_pnt_lon * cos(gv_.head);
         gv_.p(1) = gv_.p(1) + sat_.land_pnt_lon * sin(gv_.head); 
@@ -754,8 +776,8 @@ void PositionControl::monitor(const ros::TimerEvent &event)
             ROS_INFO("No measurement in time");
         }
 
-        ROS_INFO("To critical altitude: %.2f", abs(rel_.p.norm()) - sat_.crt_alt);
-        if ((abs(rel_.p.norm()) < (sat_.crt_alt - sat_.land_pnt_alt)) && (flag_.landed == false)) {
+        ROS_INFO("To critical altitude: %.2f", rel_.p(2) - sat_.crt_alt + sat_.land_pnt_alt);
+        if ((rel_.p(2) < (sat_.crt_alt - sat_.land_pnt_alt)) && (flag_.landed == false)) {
             flag_.landed = true;
             sat_.t = ros::Time::now().toSec();
             sat_.t_end = sqrt(2. * sat_.crt_alt * cmd_.thr_l);
