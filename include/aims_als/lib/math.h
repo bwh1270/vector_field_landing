@@ -334,6 +334,15 @@ inline double tanh_derivative(double x)
     return 1.0 - tanh_x * tanh_x;
 }
 
+// sech(x) = 1 / cosh(x)
+inline double sech(const double x) {
+    return 1.0 / std::cosh(x);
+}
+
+// asech(x) = acosh(1 / x)
+inline double asech(const double x) {
+    return std::acosh(1.0 / x);
+}
 
 };
 

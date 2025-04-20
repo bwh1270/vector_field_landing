@@ -170,6 +170,7 @@ class PositionControl
         };
 
         struct vf_t {
+            bool hyper;
             double phi_des;
             double phi_delta; // boundary = phi_des +- phi_delta
             double r_max;

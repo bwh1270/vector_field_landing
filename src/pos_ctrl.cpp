@@ -30,6 +30,7 @@ MAX_SIZE(20)
     nh_private_.param<double>("q_filter_lpf_freq", dob_.q_lpf_freq, 0.01);
     nh_private_.param<double>("time_constant_of_uav", dob_.tau_uav, 1.0);
 
+    nh_private_.param<bool>("vf_hyper", vf_.hyper, false);
     nh_private_.param<double>("vf_phi_des", vf_.phi_des, -20.0);
     nh_private_.param<double>("vf_phi_delta", vf_.phi_delta, 40.0);
     nh_private_.param<double>("vf_r_max", vf_.r_max, 5.0);
@@ -48,6 +49,13 @@ MAX_SIZE(20)
     vf_.margin = aims_fly::deg2rad(vf_.margin);
     vf_.c1 = vf_.margin / 1.2318;
     vf_.c2 = 2.65 / vf_.margin;
+
+    if (vf_.hyper) {
+        vf_.n1 = vf_.n2;
+        vf_.c2 = atanh(0.90) * vf_.margin;
+        vf_.c1 = abs(vf_.phi_delta) / asech(0.10);
+        ROS_INFO("New Desinged Vector Field");
+    }
 
     nh_private_.param<double>("saturation_thrust_min", sat_.thr(0), 0.25);
     nh_private_.param<double>("saturation_thrust_max", sat_.thr(1), 0.65);
@@ -600,8 +608,16 @@ Eigen::Vector3d PositionControl::calVFAccLaw()
     rel_.eta_dot << rel_r_dot, rel_r * rel_phi_err_dot;                                                        // eta_dot = r_dot*e_r + (r*phi_tilde_dot)*e_phi
 
     // vector field (h = c*e_r + s*e_phi)
-    const double c = -vf_.k1 * exp(-pow((rel_phi_err / vf_.c1), vf_.n1)) * pow(rel_r, 1./vf_.n2);
-    const double s = -vf_.k2 * tanh(rel_phi_err * vf_.c2) * rel_r;
+    double c, s;
+    if (vf_.hyper) {
+        c = -vf_.k1 * sech(rel_phi_err / vf_.c1) * pow(rel_r, 1./vf_.n2);
+        s = -vf_.k2 * tanh(rel_phi_err / vf_.c2) * pow(rel_r, 1./vf_.n2);
+
+    } else {
+        c = -vf_.k1 * exp(-pow((rel_phi_err / vf_.c1), vf_.n1)) * pow(rel_r, 1./vf_.n2);
+        s = -vf_.k2 * tanh(rel_phi_err * vf_.c2) * rel_r;
+    }
+
     vf_.h << c, s;
 
     if (vf_.moving) {
@@ -619,10 +635,19 @@ Eigen::Vector3d PositionControl::calVFAccLaw()
     }
 
     Eigen::Matrix2d Ja_h;
-    Ja_h(0,0) = (-vf_.k1 / vf_.n2) * exp(-pow((rel_phi_err / vf_.c1), vf_.n1)) * pow(rel_r, (1./vf_.n2) - 1);
-    Ja_h(0,1) = (vf_.k1 * vf_.n1 / vf_.c1) * pow(rel_r, 1./vf_.n2) * exp(-pow((rel_phi_err / vf_.c1), vf_.n1)) * pow((rel_phi_err / vf_.c1), vf_.n1 - 1);
-    Ja_h(1,0) = -vf_.k2 * tanh(rel_phi_err * vf_.c2);
-    Ja_h(1,1) = -vf_.k2 * vf_.c2 * rel_r * aims_fly::tanh_derivative(rel_phi_err * vf_.c2);
+    if (vf_.hyper) {
+        Ja_h(0,0) = (-vf_.k1 / vf_.n2) * sech(rel_phi_err / vf_.c1) * pow(rel_r, (1./vf_.n2) - 1);
+        Ja_h(0,1) = (vf_.k1 / vf_.c1) * pow(rel_r, 1./vf_.n2) * sech(rel_phi_err / vf_.c1) * tanh(rel_phi_err / vf_.c1);
+        Ja_h(1,0) = (-vf_.k2 / vf_.n2) * tanh(rel_phi_err / vf_.c2) * pow(rel_r, (1./vf_.n2) - 1);
+        Ja_h(1,1) = -vf_.k2 * vf_.c2 * rel_r * aims_fly::tanh_derivative(rel_phi_err * vf_.c2);
+
+    } else {
+        Ja_h(0,0) = (-vf_.k1 / vf_.n2) * exp(-pow((rel_phi_err / vf_.c1), vf_.n1)) * pow(rel_r, (1./vf_.n2) - 1);
+        Ja_h(0,1) = (vf_.k1 * vf_.n1 / vf_.c1) * pow(rel_r, 1./vf_.n2) * exp(-pow((rel_phi_err / vf_.c1), vf_.n1)) * pow((rel_phi_err / vf_.c1), vf_.n1 - 1);
+        Ja_h(1,0) = -vf_.k2 * tanh(rel_phi_err * vf_.c2);
+        Ja_h(1,1) = (-vf_.k2 / vf_.c2) * pow(rel_r, 1./vf_.n2) * aims_fly::tanh_derivative(rel_phi_err / vf_.c2);
+    }
+
     const Eigen::Vector2d h_dot = Ja_h * rel_.eta_dot;
 
     Eigen::Vector2d a_law = -vf_.gamma * (rel_.eta_dot - vf_.h) + h_dot;  // (er, e\phi)
