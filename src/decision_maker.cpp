@@ -296,7 +296,8 @@ bool DecisionMaker::checkErrorConditions()
     const float diff_roll = abs(err_cond_.gimbal_angles(0));
     const float diff_pan  = abs(err_cond_.gimbal_angles(2));
     
-    if ((diff_roll > err_eps_.roll) || (diff_pan > err_eps_.pan)) {
+    // if ((diff_roll > err_eps_.roll) || (diff_pan > err_eps_.pan)) {
+    if (diff_roll > err_eps_.roll) {
         ROS_WARN("Gimbal might be shutdown");
         return false;
     }

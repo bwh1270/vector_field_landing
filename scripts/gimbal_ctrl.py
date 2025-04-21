@@ -514,6 +514,7 @@ class GimbalControl:
                     if (gimbal_roll is not None) and (self.detected_):
 
                         # Gimbal control
+                        # print(abs(ref_tilt - gimbal_tilt))
                         if ((self.g_pan_before_init) and (abs(ref_tilt - gimbal_tilt) <= 3)) :
                             print(f'First: {self.g_pan_init_}')
                             print(f'Update: {gimbal_pan}')
@@ -521,7 +522,7 @@ class GimbalControl:
                             self.g_pan_before_init = False
 
 
-                        dt_lst = [abs(rospy.Time.now().to_sec() - x[0]) for x in self.uav_dq]
+                        dt_lst = [abs(rospy.Time.now().to_sec() - x[0]) for x in list(self.uav_dq)]
                         kdx = dt_lst.index(min(dt_lst))
                         R_WB = self.uav_dq[kdx][-1]
                         b_pan = np.rad2deg(self.R2E(R_WB)[-1])
@@ -531,7 +532,8 @@ class GimbalControl:
                         # print(gimbal_pan)
                         gimbal_pan = gimbal_pan - (self.g_pan_init_ - (b_pan - self.b_pan_init_))
 
-                        R_GS = self.gimbalE2R(np.deg2rad(gimbal_roll), np.deg2rad(gimbal_tilt), np.deg2rad(gimbal_pan))
+                        # R_GS = self.gimbalE2R(np.deg2rad(gimbal_roll), np.deg2rad(gimbal_tilt), np.deg2rad(gimbal_pan))
+                        R_GS = self.gimbalE2R(np.deg2rad(gimbal_roll), np.deg2rad(gimbal_tilt), 0.)
                         
 
                         self.R_GS_dq.append([rospy.Time.now().to_sec(), R_GS])
@@ -545,7 +547,7 @@ class GimbalControl:
                         # print(f"Marker R=", self.R_CM_);
                         # print(f"Gimbal R=", R_GS);
                         
-                        dt_lst = [abs(self.img_time - x[0]) for x in self.R_GS_dq]
+                        dt_lst = [abs(self.img_time - x[0]) for x in list(self.R_GS_dq)]
                         idx = dt_lst.index(min(dt_lst))
                         
                         # @debug
@@ -563,7 +565,7 @@ class GimbalControl:
                         # print(f"[desired] = {phi_des}, {theta_des}")
                         # self.data_.append([rospy.Time.now().to_sec(), ref_tilt, gimbal_tilt])
 
-                        dt_lst = [abs(self.img_time - x[0]) for x in self.uav_dq]
+                        dt_lst = [abs(self.img_time - x[0]) for x in list(self.uav_dq)]
                         jdx = dt_lst.index(min(dt_lst))
 
                         # Transformation Marker
