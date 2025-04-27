@@ -155,6 +155,7 @@ class PositionControl
             Eigen::Vector3d p;
             Eigen::Vector3d v;
             double head;
+            double fixed_head;
             Eigen::Matrix2d R;
             double v_lpf_freq;  // lpf for gv velocity 
             double h_lpf_freq;  // lpf for gv head
@@ -244,6 +245,7 @@ class PositionControl
             bool landed;
             bool sitl;
             bool log;
+            bool fixed_yaw;
         };
 
         fm_t  fm_;

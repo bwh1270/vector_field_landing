@@ -13,18 +13,20 @@
         <param name="debug"       value="false" />
         <param name="sitl"        value="false" />
         <param name="logging"     value="true" />
+        <param name="fixed_yaw"   value="false" />
 
         <param name="uav_vel_lpf_freq"  value="1.5" />
         <param name="uav_acc_lpf_freq"  value="5.0" />
-        <param name="uav_hover_thrust"   value="0.43" />
+        <param name="uav_hover_thrust"  value="0.43" />
 
-        <param name="gv_vel_lpf_freq" value="1.5" />
-        <param name="gv_head_lpf_freq" value="0.5" />
+        <param name="gv_vel_lpf_freq"  value="1.5" />
+        <param name="gv_head_lpf_freq" value="0.01" />
+        <param name="gv_fixed_head"    value="90.0" />
 
         <param name="standoff_x"  value="-0.8" />
         <param name="standoff_y"  value="0.0" />
         <param name="standoff_z"  value="1.4" />
-        <param name="a_cmd_alpha"  value="1.0" />
+        <param name="a_cmd_alpha" value="1.0" />
 
         <param name="q_filter_lpf_freq" value="0.1" />
         <param name="time_constant_of_uav" value="0.7" />
