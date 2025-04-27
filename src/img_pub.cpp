@@ -134,6 +134,8 @@ int main(int argc, char **argv)
 
     while (ros::ok())
     {
+        ros::Time now = ros::Time::now();
+
         vcap >> cv_img;
         // vcap.grab();  // grab frame but do not decode previous frames (avoids buffering delay)
         // vcap.retrieve(cv_img); // retrieve the latest frame only
@@ -147,7 +149,6 @@ int main(int argc, char **argv)
         // To publish image data with ROS message, 
         // use cv_bridge to convert OpenCV data structure to ROS message
 
-        ros::Time now = ros::Time::now();
         sensor_msgs::ImagePtr img_ptr = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_img).toImageMsg();
 
         aims_als::ImgWithHeader header_img_msg;

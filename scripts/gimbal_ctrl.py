@@ -50,10 +50,10 @@ class GimbalControl:
         self.uav_dq = deque()
         self.uav_dq.append([0, self.pW_B_, self.R_WB_])
 
-        self.tB_G_ = np.array([0.06, 0, -0.09])
-        self.R_BG_ = np.array([[1, 0,0],
+        self.tB_S_ = np.array([0.06, 0, -0.09])  # tB_S
+        self.R_WG_ = np.array([[1, 0,0],
                                [0,-1,0],
-                               [0,0,-1]])
+                               [0,0,-1]]) 
 
         self.R_GS_dq = deque()
 
@@ -287,6 +287,23 @@ class GimbalControl:
         pitch = -np.arcsin(R[2, 0])  
         yaw = np.arctan2(R[1, 0], R[0, 0])
         return np.array([roll, pitch, yaw])
+    
+    def E2R(self, roll, pitch, yaw):
+        # 각도 -> 라디안 (필요하면)
+        cr = np.cos(roll)
+        sr = np.sin(roll)
+        cp = np.cos(pitch)
+        sp = np.sin(pitch)
+        cy = np.cos(yaw)
+        sy = np.sin(yaw)
+        
+        # ZYX 순서로 회전행렬 만들기
+        R = np.array([
+            [cy * cp, cy * sp * sr - sy * cr, cy * sp * cr + sy * sr],
+            [sy * cp, sy * sp * sr + cy * cr, sy * sp * cr - cy * sr],
+            [-sp,     cp * sr,                cp * cr]
+        ])
+        return R
 
     def gimbalE2R(self, roll: float, pitch: float, yaw: float) -> np.ndarray:
         c_r, s_r = np.cos(roll), np.sin(roll)
@@ -367,7 +384,7 @@ class GimbalControl:
         self.R_WB_ = self.q2R(self.qW_B_)
         
         self.uav_dq.append([msg.header.stamp.to_sec(), self.pW_B_, self.R_WB_])
-        if (len(self.uav_dq) >= 20):
+        if (len(self.uav_dq) >= 10):
             self.uav_dq.popleft()
 
     def get_yaw_only_projection(self, R):
@@ -490,6 +507,13 @@ class GimbalControl:
 
         try:
             while not rospy.is_shutdown():
+
+                if (ctrl_loop_iter == 500):
+                    ctrl_loop_iter = 500
+                else:
+                    print(f'Wait for stabilized {ctrl_loop_iter/500*100}%')
+                    ctrl_loop_iter += 1
+                    continue
                 
                 gimbal_roll, gimbal_tilt, gimbal_pan = self.receive()
                 if (self._debug):
@@ -509,35 +533,40 @@ class GimbalControl:
                     print("Gimbal initialization complete !!")
 
                 else:
+                    print(f'des: {ref_roll}')
+                    print(f'res: {gimbal_roll}')
+
                     self.request(ref_roll, ref_tilt, ref_pan)
 
                     if (gimbal_roll is not None) and (self.detected_):
 
                         # Gimbal control
-                        # print(abs(ref_tilt - gimbal_tilt))
-                        if ((self.g_pan_before_init) and (abs(ref_tilt - gimbal_tilt) <= 3)) :
-                            print(f'First: {self.g_pan_init_}')
-                            print(f'Update: {gimbal_pan}')
-                            self.g_pan_init_ = gimbal_pan 
-                            self.g_pan_before_init = False
+
+                        # # @dynamic calibration for yaw
+                        # # print(abs(ref_tilt - gimbal_tilt))
+                        # if ((self.g_pan_before_init) and (abs(ref_tilt - gimbal_tilt) <= 3)) :
+                        #     print(f'First: {self.g_pan_init_}')
+                        #     print(f'Update: {gimbal_pan}')
+                        #     self.g_pan_init_ = gimbal_pan 
+                        #     self.g_pan_before_init = False
 
 
-                        dt_lst = [abs(rospy.Time.now().to_sec() - x[0]) for x in list(self.uav_dq)]
-                        kdx = dt_lst.index(min(dt_lst))
-                        R_WB = self.uav_dq[kdx][-1]
-                        b_pan = np.rad2deg(self.R2E(R_WB)[-1])
-                        # print(self.b_pan_init_)
-                        # print(b_pan)
-                        # print(self.g_pan_init_ - (b_pan - self.b_pan_init_))
-                        # print(gimbal_pan)
-                        gimbal_pan = gimbal_pan - (self.g_pan_init_ - (b_pan - self.b_pan_init_))
+                        # dt_lst = [abs(rospy.Time.now().to_sec() - x[0]) for x in list(self.uav_dq)]
+                        # kdx = dt_lst.index(min(dt_lst))
+                        # R_WB = self.uav_dq[kdx][-1]
+                        # b_pan = np.rad2deg(self.R2E(R_WB)[-1])
+                        # # print(self.b_pan_init_)
+                        # # print(b_pan)
+                        # # print(self.g_pan_init_ - (b_pan - self.b_pan_init_))
+                        # # print(gimbal_pan)
+                        # gimbal_pan = gimbal_pan - (self.g_pan_init_ - (b_pan - self.b_pan_init_))
 
                         # R_GS = self.gimbalE2R(np.deg2rad(gimbal_roll), np.deg2rad(gimbal_tilt), np.deg2rad(gimbal_pan))
                         R_GS = self.gimbalE2R(np.deg2rad(gimbal_roll), np.deg2rad(gimbal_tilt), 0.)
                         
 
                         self.R_GS_dq.append([rospy.Time.now().to_sec(), R_GS])
-                        if (len(self.R_GS_dq) >= 20):
+                        if (len(self.R_GS_dq) >= 10):
                             self.R_GS_dq.popleft()
 
                         # @debug
@@ -549,7 +578,8 @@ class GimbalControl:
                         
                         dt_lst = [abs(self.img_time - x[0]) for x in list(self.R_GS_dq)]
                         idx = dt_lst.index(min(dt_lst))
-                        
+                        # print(f"Gimbal: (idx, dt) = ({idx}/10), {min(dt_lst):.4f})")
+
                         # @debug
                         # print(np.array(dt_lst))
                         # print(f'delay: [{dt_lst[idx]-dt_lst[-1]}]')
@@ -561,12 +591,13 @@ class GimbalControl:
                         ref_tilt = theta_des
 
                         # @debug
-                        # print(f"[Roll,Tilt,Pan]=[{gimbal_roll:.2f},{gimbal_tilt:.2f},{gimbal_pan:.2f}]")
+                        # print(f"Gimbal: [Roll,Tilt,Pan]=[{gimbal_roll:.2f},{gimbal_tilt:.2f},{gimbal_pan:.2f}]")
                         # print(f"[desired] = {phi_des}, {theta_des}")
                         # self.data_.append([rospy.Time.now().to_sec(), ref_tilt, gimbal_tilt])
 
                         dt_lst = [abs(self.img_time - x[0]) for x in list(self.uav_dq)]
                         jdx = dt_lst.index(min(dt_lst))
+                        # print(f"UAV: (idx, dt) = ({jdx}/10), {min(dt_lst):.4f})")
 
                         # Transformation Marker
                         # print(idx, jdx)
@@ -574,14 +605,26 @@ class GimbalControl:
                         R_WB = self.uav_dq[jdx][-1]
                         pW_B = self.uav_dq[jdx][1]
 
-                        # print(f"pC_M: {self.pC_M_}")
-                        # print(f"pG_M: {R_GS @ (self.R_SC_ @ self.pC_M_)}")
-                        # print(f"pB_M: {self.R_BG_ @ (R_GS @ (self.R_SC_ @ self.pC_M_)) + self.tB_G_}")
-                        # print(f"pW_M: {R_WB @ (self.R_BG_ @ (R_GS @ (self.R_SC_ @ self.pC_M_)) + self.tB_G_) + pW_B}")
-                        # print(R_WB)
-                        pW_M = R_WB @ (self.R_BG_ @ (R_GS @ (self.R_SC_ @ self.pC_M_)) + self.tB_G_) + pW_B
-                        qW_M = self.R2q(R_WB @ (self.R_BG_ @ (R_GS @ (self.R_SC_ @ self.R_CM_))))
-                        
+                        # E = self.R2E(self.R_WB_)
+                        # print(f"UAV: [Roll,Tilt,Pan]=[{np.rad2deg(E[0]):.2f},{np.rad2deg(E[1]):.2f},{np.rad2deg(E[2]):.2f}]")
+                        # pW_M = R_WB @ (self.R_BG_ @ (R_GS @ (self.R_SC_ @ self.pC_M_)) + self.tB_G_) + pW_B
+                        # qW_M = self.R2q(R_WB @ (self.R_WG_ @ (R_GS @ (self.R_SC_ @ self.R_CM_))))
+
+                        R_WB_yaw = self.E2R(0., 0., self.R2E(R_WB)[-1])
+                        pW_M = R_WB_yaw @ (self.R_WG_ @ (R_GS @ (self.R_SC_ @ self.pC_M_))) + pW_B + R_WB @ self.tB_S_
+                        qW_M = self.R2q(R_WB_yaw @ (self.R_WG_ @ (R_GS @ (self.R_SC_ @ self.R_CM_))))
+
+                        # if (ctrl_loop_iter % 100 == 0):
+                        # #     self.g_pan_init_ = gimbal_pan
+                        #     ctrl_loop_iter = 0
+                        #     print(f"pC_M: {self.pC_M_}")
+                        #     print(f"pS_M: {self.R_SC_ @ self.pC_M_}")
+                        #     print(f"pG_M: {R_GS @ (self.R_SC_ @ self.pC_M_)}")
+                        #     print(f"pW_M: {R_WB_yaw @ (self.R_WG_ @ (R_GS @ (self.R_SC_ @ self.pC_M_)))}")
+                        #     print(f'position: {pW_B + R_WB @ self.tB_S_}')
+
+                        # print(f"pW_M: {pW_M}")
+
                         # @debug
                         # E = self.q2E(qW_M)
                         
@@ -608,12 +651,13 @@ class GimbalControl:
                         #     self.g_pan_init_ = gimbal_pan
                         #     ctrl_loop_iter = 0
 
-                        ctrl_loop_iter += 1
-                
-                
+                    
                 self.rate_.sleep()
 
-            
+        # except:
+        #     print("Some error occurs !!")
+        #     pass
+
         finally:
             # @debug
             # with open('test.csv', 'w',newline='') as f:  
