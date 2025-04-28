@@ -544,13 +544,6 @@ class GimbalControl:
 
         try:
             while not rospy.is_shutdown():
-
-                if (ctrl_loop_iter == 500):
-                    ctrl_loop_iter = 500
-                else:
-                    print(f'Wait for stabilized {ctrl_loop_iter/500*100}%')
-                    ctrl_loop_iter += 1
-                    continue
                 
                 gimbal_roll, gimbal_tilt, gimbal_pan = self.receive()
                 if (self._debug):
@@ -567,11 +560,21 @@ class GimbalControl:
                     request_iter = self.requestInit(request_iter)
                     self.g_pan_init_ = gimbal_pan 
                     self.b_pan_init_ = np.rad2deg(self.R2E(self.R_WB_)[-1])
-                    print("Gimbal initialization complete !!")
 
+
+                    # 대기할 시간 (초 단위)
+                    N = 5.0  
+                    rospy.loginfo(f"[stabilized] {N}초간 대기합니다…")
+
+                    # N초 대기
+                    rospy.sleep(N)
+
+                    rospy.loginfo("[stabilized] 대기가 완료되었습니다.")
+                    
+                    
                 else:
-                    print(f'des: {ref_roll}, {ref_tilt}')
-                    print(f'res: {gimbal_roll}, {gimbal_tilt}')
+                    # print(f'des: {ref_roll}, {ref_tilt}')
+                    # print(f'res: {gimbal_roll}, {gimbal_tilt}')
 
                     if (gimbal_roll is None) or (gimbal_tilt is None):
                         continue
