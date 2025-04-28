@@ -217,28 +217,65 @@ class GimbalControl:
         ])
         return q
 
+    # def receive(self):
+    #     '''
+    #     Reads 64 bytes of data from the serial port and calculates roll, tilt, and pan angles.
+    #     Publishes the calculated angle values ​​as ROS messages.
+    #     '''
+    #     if self.ser_.in_waiting >= 64:
+    #         data_from_ser = self.ser_.read(64)
+    #         data_bits_ser = ''.join(format(byte, '08b') for byte in data_from_ser)
+    #         data_list_ser = [int(data_bits_ser[i:i+8], 2) for i in range(0, len(data_bits_ser), 8)]
+
+    #         '''
+    #         Gimbal frame{G}:
+    #             - g1 == b2 (uav nose)
+    #             - g2 == b1 (uav right)
+    #             - g3 == -b3 (uav down)
+    #         ''' 
+    #         roll = self.computeAngle(data_list_ser[7], data_list_ser[6])
+    #         tilt = self.computeAngle(data_list_ser[9], data_list_ser[8])
+    #         pan = self.computeAngle(data_list_ser[11], data_list_ser[10])
+            
+    #         return roll, tilt, pan
+    #     return None, None, None
+
     def receive(self):
         '''
-        Reads 64 bytes of data from the serial port and calculates roll, tilt, and pan angles.
-        Publishes the calculated angle values ​​as ROS messages.
+        Reads 64 bytes of data from the serial port, verifies CRC,
+        and calculates roll, tilt, and pan angles.
         '''
+        # 64바이트 이상 대기열에 쌓여 있으면 읽기
         if self.ser_.in_waiting >= 64:
             data_from_ser = self.ser_.read(64)
-            data_bits_ser = ''.join(format(byte, '08b') for byte in data_from_ser)
-            data_list_ser = [int(data_bits_ser[i:i+8], 2) for i in range(0, len(data_bits_ser), 8)]
-
-            '''
-            Gimbal frame{G}:
-                - g1 == b2 (uav nose)
-                - g2 == b1 (uav right)
-                - g3 == -b3 (uav down)
-            ''' 
-            roll = self.computeAngle(data_list_ser[7], data_list_ser[6])
-            tilt = self.computeAngle(data_list_ser[9], data_list_ser[8])
-            pan = self.computeAngle(data_list_ser[11], data_list_ser[10])
+            # 간단히 각 바이트를 0~255 int 리스트로 변환
+            data_list = list(data_from_ser)
+            
+            # CRC 검증 (마지막 2바이트)
+            payload    = data_list[:-2]                               # 앞 62바이트
+            recv_crc   = (data_list[-2] << 8) | data_list[-1]         # 상위·하위 합쳐서 16비트
+            calc_crc   = self.computeCRC(payload)
+            if recv_crc != calc_crc:
+                # CRC 불일치 시 경고 로깅 후 무시
+                try:
+                    import rospy
+                    rospy.logwarn(f"[Gimbal] CRC mismatch: recv=0x{recv_crc:04X}, calc=0x{calc_crc:04X}")
+                except ImportError:
+                    print(f"[Gimbal] CRC mismatch: recv=0x{recv_crc:04X}, calc=0x{calc_crc:04X}")
+                return None, None, None
+            
+            # Gimbal frame {G}:
+            #   g1 == b2 (uav nose), g2 == b1 (uav right), g3 == -b3 (uav down)
+            roll = self.computeAngle(payload[7],  payload[6])
+            tilt = self.computeAngle(payload[9],  payload[8])
+            pan  = self.computeAngle(payload[11], payload[10])
             
             return roll, tilt, pan
+
+        # 데이터가 충분치 않으면 None 반환
         return None, None, None
+
+
 
     def requestInit(self, request_iter):
         '''
@@ -533,8 +570,13 @@ class GimbalControl:
                     print("Gimbal initialization complete !!")
 
                 else:
-                    print(f'des: {ref_roll}')
-                    print(f'res: {gimbal_roll}')
+                    print(f'des: {ref_roll}, {ref_tilt}')
+                    print(f'res: {gimbal_roll}, {gimbal_tilt}')
+
+                    if (gimbal_roll is None) or (gimbal_tilt is None):
+                        continue
+                    # if (abs(gimbal_roll) > 90) or (abs(gimbal_tilt) > 130):
+                    #     continue
 
                     self.request(ref_roll, ref_tilt, ref_pan)
 
