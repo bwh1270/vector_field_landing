@@ -574,9 +574,10 @@ class GimbalControl:
                     
                 else:
                     # print(f'des: {ref_roll}, {ref_tilt}')
-                    # print(f'res: {gimbal_roll}, {gimbal_tilt}')
+                    print(f'res: {gimbal_roll}, {gimbal_tilt}')
 
                     if (gimbal_roll is None) or (gimbal_tilt is None):
+                        print('none')
                         continue
                     # if (abs(gimbal_roll) > 90) or (abs(gimbal_tilt) > 130):
                     #     continue
@@ -584,7 +585,7 @@ class GimbalControl:
                     self.request(ref_roll, ref_tilt, ref_pan)
 
                     if (gimbal_roll is not None) and (self.detected_):
-
+                        print('here')
                         # Gimbal control
 
                         # # @dynamic calibration for yaw
