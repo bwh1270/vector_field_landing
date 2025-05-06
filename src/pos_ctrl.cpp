@@ -373,8 +373,9 @@ void PositionControl::gvEstiCb(const nav_msgs::Odometry::ConstPtr &msg)
         }
     }
     
-    // ROS_INFO("UAV Head: [%.2f] deg", aims_fly::rad2deg(uav_.head));
-    // ROS_INFO("GV Head:  [%.2f] deg", aims_fly::rad2deg(gv_.head));
+    if (abs(aims_fly::rad2deg(uav_.head) - aims_fly::rad2deg(gv_.head)) > 90.0) {
+        ROS_WARN("Head_GV - Head_UAV > 90");
+    }
 
     //           lon              lat
     gv_.R << cos(gv_.head), -sin(gv_.head),
