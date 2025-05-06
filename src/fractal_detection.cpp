@@ -76,8 +76,7 @@ class FractalDetection
         ros::Subscriber sub_header_img_;
 
         image_transport::ImageTransport it_;
-        // image_transport::Subscriber img_sub_; 
-        // ros::Subscriber sub_img_time_; 
+        image_transport::Subscriber img_sub_; 
 
         aruco::FractalDetector fd_;
         
@@ -95,8 +94,7 @@ class FractalDetection
         void initDetector();
         void rodrigues2Quat(const cv::Mat &rvec);
         void setTranslation(const cv::Mat &tvec);
-        // void imgCb(const sensor_msgs::ImageConstPtr &msg);
-        // void timeCb(const std_msgs::Time::ConstPtr &msg);
+        void imgCb(const sensor_msgs::ImageConstPtr &msg);
         void headerImgCb(const aims_als::ImgWithHeader::ConstPtr &msg);
 };
 
@@ -125,8 +123,7 @@ FractalDetection::FractalDetection(const ros::NodeHandle &nh, const ros::NodeHan
     nh_private_.param<bool>("debug",         _debug, false);
     nh_private_.param<bool>("visualize", _visualize, false);
 
-    // img_sub_ = it_.subscribe("/camera/image_raw", 1, &FractalDetection::imgCb, this);
-    // sub_img_time_ = nh_.subscribe("/aims/image_time", 1, &FractalDetection::timeCb, this, ros::TransportHints().tcpNoDelay());
+    img_sub_ = it_.subscribe("/camera/image_raw_decompressed", 1, &FractalDetection::imgCb, this);
     sub_header_img_ = nh_.subscribe("/aims/header_image", 1, &FractalDetection::headerImgCb, this, ros::TransportHints().tcpNoDelay());
 
     pub_marker_ = nh_.advertise<aims_als::Marker>("/aims/fractal_detections", 1);
@@ -203,79 +200,77 @@ void FractalDetection::setTranslation(const cv::Mat &tvec)
     }
 }
 
-// void FractalDetection::timeCb( const std_msgs::Time::ConstPtr &msg)
-// {
-//     img_time_.data = msg->data;
-// }
 
-// void FractalDetection::imgCb(const sensor_msgs::ImageConstPtr &msg)
-// {
-    // try {
-    //     // Convert the ROS image message to OpenCV format
-    //     cv::Mat cv_img = cv_bridge::toCvCopy(msg, "bgr8")->image;
+void FractalDetection::imgCb(const sensor_msgs::ImageConstPtr &msg)
+{
+    try {
+        // Convert the ROS image message to OpenCV format
+        ROS_INFO("Input encoding: %s", msg->encoding.c_str());
 
-    //     if (_debug) {
-    //         ROS_INFO("Received image: %d x %d", cv_img.cols, cv_img.rows);
-    //     }
+        cv::Mat cv_img = cv_bridge::toCvCopy(msg, "bgr8")->image;
+
+        if (_debug) {
+            ROS_INFO("Received image: %d x %d", cv_img.cols, cv_img.rows);
+        }
         
-    //     fractal_marker_.detect = false;
+        fractal_marker_.detect = false;
 
-    //     if (cv_img.cols == _c_width) {
-    //         if (fd_.detect(cv_img)) {
-    //             if (_debug) {
-    //                 ROS_INFO("marker is detected");
-    //             }
+        if (cv_img.cols == _c_width) {
+            if (fd_.detect(cv_img)) {
+                if (_debug) {
+                    ROS_INFO("marker is detected");
+                }
                 
-    //             if (fd_.poseEstimation()) {
-    //                 if (_debug) {
-    //                     ROS_INFO("marker Pose is estimated");
-    //                 }
+                if (fd_.poseEstimation()) {
+                    if (_debug) {
+                        ROS_INFO("marker Pose is estimated");
+                    }
 
-    //                 const cv::Mat rvec = fd_.getRvec();
-    //                 const cv::Mat tvec = fd_.getTvec();
+                    const cv::Mat rvec = fd_.getRvec();
+                    const cv::Mat tvec = fd_.getTvec();
 
-    //                 rodrigues2Quat(rvec);
-    //                 setTranslation(tvec);
+                    rodrigues2Quat(rvec);
+                    setTranslation(tvec);
 
-    //                 fractal_marker_.pose_stmp.header.stamp = img_time_.data;
-    //                 fractal_marker_.detect = true;
-    //             }
+                    fractal_marker_.detect = true;
+                }
 
-    //         }
-    //     }
-    //     // pub_marker_.publish(fractal_marker_);
+            }
+        }
+        // pub_marker_.publish(fractal_marker_);
 
 
-    //     if (_visualize) {
-    //         // if (fd_.detect(cv_img)) {
-    //         fd_.drawMarkers(cv_img);
-    //         ROS_INFO("Detected Fractal Marker with ID: %d", fd_.getMarkers()[0].id);
-    //         ROS_INFO("Pose: [x: %f, y: %f, z: %f]", fractal_marker_.pose_stmp.pose.position.x,
-    //                                                 fractal_marker_.pose_stmp.pose.position.y,
-    //                                                 fractal_marker_.pose_stmp.pose.position.z);
-    //         // }
+        if (_visualize) {
+            // if (fd_.detect(cv_img)) {
+            fd_.drawMarkers(cv_img);
+            if (fd_.detect(cv_img) && fd_.poseEstimation()) {
+                ROS_INFO("Detected Fractal Marker with ID: %d", fd_.getMarkers()[0].id);
+                ROS_INFO("Pose: [x: %f, y: %f, z: %f]", fractal_marker_.pose_stmp.pose.position.x,
+                                                        fractal_marker_.pose_stmp.pose.position.y,
+                                                        fractal_marker_.pose_stmp.pose.position.z);
+            }
 
-    //         // Calculate the midpoints
-    //         const int mid_x = _c_width / 2;
-    //         const int mid_y = _c_height / 2;
+            // Calculate the midpoints
+            const int mid_x = _c_width / 2;
+            const int mid_y = _c_height / 2;
 
-    //         // Draw a vertical line at the midpoint
-    //         cv::line(cv_img, cv::Point(mid_x, 0), cv::Point(mid_x, _c_height), cv::Scalar(0, 255, 0), 1);
+            // Draw a vertical line at the midpoint
+            cv::line(cv_img, cv::Point(mid_x, 0), cv::Point(mid_x, _c_height), cv::Scalar(0, 255, 0), 1);
 
-    //         // Draw a horizontal line at the midpoint
-    //         cv::line(cv_img, cv::Point(0, mid_y), cv::Point(_c_width, mid_y), cv::Scalar(0, 255, 0), 1);
+            // Draw a horizontal line at the midpoint
+            cv::line(cv_img, cv::Point(0, mid_y), cv::Point(_c_width, mid_y), cv::Scalar(0, 255, 0), 1);
 
-    //         ROS_INFO("Input Image: (dimension, height, width)=(%d,%d,%d)", cv_img.dims, cv_img.rows, cv_img.cols);
+            ROS_INFO("Input Image: (dimension, height, width)=(%d,%d,%d)", cv_img.dims, cv_img.rows, cv_img.cols);
                                                     
-    //         cv::imshow("Fractal Marker Detection with Lines", cv_img);
-    //         cv::waitKey(1);  
-    //     }
-    // }
-    // catch (cv_bridge::Exception& e)
-    // {
-    //     ROS_ERROR("cv_bridge exception: %s", e.what());
-    // }
-// }
+            cv::imshow("Fractal Marker Detection with Lines", cv_img);
+            cv::waitKey(1);  
+        }
+    }
+    catch (cv_bridge::Exception& e)
+    {
+        ROS_ERROR("cv_bridge exception: %s", e.what());
+    }
+}
 
 void FractalDetection::headerImgCb(const aims_als::ImgWithHeader::ConstPtr &msg)
 {

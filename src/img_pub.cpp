@@ -143,7 +143,7 @@ int main(int argc, char **argv)
 
         if (cv_img.empty()) {
             ROS_WARN("Empty image");
-            return -1;
+            continue;
         }
         
         // To publish image data with ROS message, 

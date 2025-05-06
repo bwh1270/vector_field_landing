@@ -21,8 +21,6 @@ MAX_SIZE(20)
 
     nh_private_.param<double>("gv_vel_lpf_freq", gv_.v_lpf_freq, 1.5);
     nh_private_.param<double>("gv_head_lpf_freq", gv_.h_lpf_freq, 5.0);
-    nh_private_.param<double>("gv_fixed_head", gv_.fixed_head, 0.0);
-    gv_.fixed_head = aims_fly::deg2rad(gv_.fixed_head);
 
     nh_private_.param<double>("standoff_x", cmd_.standoff(0), 0.0);
     nh_private_.param<double>("standoff_y", cmd_.standoff(1), 0.0);
@@ -368,7 +366,11 @@ void PositionControl::gvEstiCb(const nav_msgs::Odometry::ConstPtr &msg)
     gv_.head = computeHead(R.col(0));
     gv_.head = aims_fly::lpf(gv_.head, gv_.h_lpf_alpha, head_prev);
     if (flag_.fixed_yaw) {
-        gv_.head = gv_.fixed_head;
+        if (uav_.fsm == 4) {
+            gv_.head = gv_.fixed_head;
+        } else {
+            gv_.fixed_head = gv_.head;
+        }
     }
     
     // ROS_INFO("UAV Head: [%.2f] deg", aims_fly::rad2deg(uav_.head));
@@ -613,12 +615,13 @@ double PositionControl::computeHead(const Eigen::Vector3d &b1)
 
 Eigen::Vector3d PositionControl::getLatVec(const Eigen::Vector3d &u)
 {   
-    // This function gets lateral velocity for concating lateral acceleration 
-    // with vector field acceleration law
+    // This function extracts lateral acc. for concating with vector field acceleration law
+    // [x,y]^T = [c,-s; s,c] [lon,lat]^T  
+    // lat = [-s,c]^T [x,y]
+    // Thereforfe, [x,y]^T = [c,-s; s,c] [0,lat]^T = [-s,c]*lat
 
-    // (2) projection and extraction
     Eigen::Vector2d uxy(u(0), u(1));
-    uxy = uxy.dot(gv_.R.col(1))*gv_.R.col(1);
+    uxy = (uxy.dot(gv_.R.col(1)))*gv_.R.col(1);
     return Eigen::Vector3d(uxy(0), uxy(1), 0.) + g_;
 }
 
@@ -781,8 +784,8 @@ void PositionControl::monitor(const ros::TimerEvent &event)
     const double t = ros::Time::now().toSec();
     if (uav_.fm == fm_.offboard) {
         if ((abs(t-uav_.t) > sat_.T) || (abs(t-gv_.t) > sat_.T) || (abs(t-uav_.fsm_time) > sat_.T)) {
-            // changeFlightMode(fm_.hold);
-            // initCmd();
+            changeFlightMode(fm_.hold);
+            initCmd();
             ROS_INFO("No measurement in time");
         }
 

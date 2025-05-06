@@ -73,6 +73,7 @@ catkin_install_python(PROGRAMS
   scripts/gimbal_ctrl.py
   scripts/led_ctrl.py
   scripts/sitl/gv_ctrl.py
+  scripts/video_writer.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
