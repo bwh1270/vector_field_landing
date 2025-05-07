@@ -72,7 +72,7 @@ MAX_SIZE(20)
     nh_private_.param<double>("saturation_acc_ratio_for_land", sat_.acc_ratio, 0.5);
     assert(sat_.acc_ratio < 0.6);
     nh_private_.param<double>("saturation_land_point_altitude", sat_.land_pnt_alt, 0.0);
-    nh_private_.param<double>("saturation_land_thrust_scaled", sat_.land_thrust_scaled, true);
+    nh_private_.param<bool>("saturation_land_thrust_scaled", sat_.land_thrust_scaled, true);
     nh_private_.param<double>("saturation_uav_height", sat_.leg_len, 0.0);
 
     if (sat_.land_pnt_alt >= 0.0) {
