@@ -130,9 +130,14 @@ class GimbalControl:
         _baud_rate = rospy.get_param('~baud_rate',     115200)
         self._debug = rospy.get_param('~debug',         False)
 
+        # Gimbal control margin: pitch
         _vfov = rospy.get_param('/vfov', 43.75)
         _pitch_margin_ratio = rospy.get_param('~pitch_margin_ratio', 0.5)
-        self.vfov_margin = np.deg2rad(_vfov*_pitch_margin_ratio)
+        self.vfov_margin    = np.deg2rad(_vfov * _pitch_margin_ratio)
+
+        # Gimbal control margin: roll
+        _roll_margin_ratio  = rospy.get_param('~roll_margin_ratio', 0.5)
+        self.hfov_margin    = np.deg2rad(70.0 * _roll_margin_ratio)
 
         # Open serial port
         try:
@@ -512,26 +517,34 @@ class GimbalControl:
         
         # Additional Controller (adding the zero if error is larger than margin)
         #                        no control action otherwise
+
+        # Pitch
         err_pitch = np.abs(gimbal_pitch - theta_des)  # radian
- 
         if (err_pitch >= self.vfov_margin):
             K_theta = 22
             theta_cmd = theta_des + (theta_des - self.theta_des_old_) * K_theta
-            # K_phi   = 55 
-            # phi_cmd = phi_des + (phi_des - self.phi_des_old_) * K_phi
         else:
             theta_cmd = gimbal_pitch
+            
+        # Roll
+        err_roll = np.abs(gimbal_roll - phi_des)  # radian
+        if (err_roll >= self.hfov_margin):
+            K_phi   = 55 
+            phi_cmd = phi_des + (phi_des - self.phi_des_old_) * K_phi
+        else:
+            phi_cmd   = gimbal_roll
+
 
         # Clamping
-        phi_cmd = 0  #self.clamp(phi_cmd, -25, 25)
-        theta_cmd = self.clamp(theta_cmd, -100, -5)  # real limit[-115,10]
+        phi_cmd   = self.clamp(phi_cmd,    -25, 25)
+        theta_cmd = self.clamp(theta_cmd, -115,  0)  # real limit[-115,10]
 
         # @debug
         # print(theta_des, self.theta_des_old_, theta_cmd)
         # self.data_.append([rospy.Time.now().to_sec(), np.rad2deg(phi_des), gimbal_roll, phi_cmd, np.rad2deg(theta_des), gimbal_pitch, theta_cmd])
 
         # Update
-        # self.phi_des_old_ = phi_des
+        self.phi_des_old_ = phi_des
         self.theta_des_old_ = theta_des
 
         return phi_cmd, theta_cmd
