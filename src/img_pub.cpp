@@ -108,7 +108,7 @@ int main(int argc, char **argv)
      *  - first: choose a default camera of the system
      *  - second: use the Video4Linux2 driver (backend) within OpenCV
      */
-    cv::VideoCapture vcap(_cam_dev_id, cv::CAP_V4L2);
+    cv::VideoCapture vcap("/dev/usb_cam", cv::CAP_V4L2);
 
     vcap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
     vcap.set(cv::CAP_PROP_FPS,             _c_fps);
