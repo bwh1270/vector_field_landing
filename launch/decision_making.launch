@@ -19,7 +19,7 @@
         <param name="vf_phi_delta"  value="34.375"/>
 
         <param name="landing_condition_gv_speed" value="5.0"/>
-        <param name="landing_condition_duration" value="6.0"/>
+        <param name="landing_condition_duration" value="4.0"/>
 
         <param name="landed_condition_critical_altitude" value="0.30"/>
     </node>

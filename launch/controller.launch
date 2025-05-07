@@ -13,16 +13,16 @@
         <param name="debug"       value="false" />
         <param name="sitl"        value="false" />
         <param name="logging"     value="true" />
-        <param name="fixed_yaw"   value="false" />
+        <param name="fixed_yaw"   value="true" />
 
         <param name="uav_vel_lpf_freq"  value="1.5" />
         <param name="uav_acc_lpf_freq"  value="5.0" />
         <param name="uav_hover_thrust"  value="0.43" />
 
         <param name="gv_vel_lpf_freq"  value="1.5" />
-        <param name="gv_head_lpf_freq" value="1.0" />
+        <param name="gv_head_lpf_freq" value="0.5" />
 
-        <param name="standoff_x"  value="-0.4" />
+        <param name="standoff_x"  value="-0.8" />
         <param name="standoff_y"  value="0.0" />
         <param name="standoff_z"  value="2.0" />
         <param name="a_cmd_alpha" value="1.0" />
@@ -42,20 +42,20 @@
         <param name="vf_n1"        value="4.0" />
         <param name="vf_n2"        value="3.0" />
         <param name="vf_gamma"     value="2.5" />
-        <param name="vf_moving"    value="false" /> -->
+        <param name="vf_moving"    value="true" /> -->
 
         <param name="vf_hyper"     value="true" />    
         <param name="vf_phi_des"   value="-27.5" />
         <param name="vf_phi_delta" value="34.375" />
         <param name="vf_r_max"     value="5.0" />
-        <param name="vf_k1"        value="0.30" />
+        <param name="vf_k1"        value="0.35" />
         <param name="vf_k2"        value="0.25" />
         <param name="vf_margin"    value="10.0" />
         <param name="vf_c1"        value="8.5" />
         <param name="vf_c2"        value="2.0" />
         <param name="vf_n1"        value="2.0" />
         <param name="vf_n2"        value="2.0" />
-        <param name="vf_gamma"     value="2.5" />
+        <param name="vf_gamma"     value="3.0" />
         <param name="vf_moving"    value="false" />
 
 
@@ -67,8 +67,8 @@
         <param name="saturation_vel_z_max"           value="1.0" />
         <param name="saturation_integral_vel_xy_max" value="5.0" />
         <param name="saturation_integral_vel_z_max"  value="3.0" />
-        <param name="saturation_no_meas_duration"    value="0.5" />
-        <param name="saturation_critical_altitude"   value="0.28" />
+        <param name="saturation_no_meas_duration"    value="0.7" />
+        <param name="saturation_critical_altitude"   value="0.35" />
         <param name="saturation_land_point_altitude" value="-0.1" />
 0
 

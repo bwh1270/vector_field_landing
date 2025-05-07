@@ -44,12 +44,12 @@
         <param name="initial_state_uncertainty" value="500" />
         <param name="model_acc_uncertainty"     value="0.05" />
         <param name="meas_uncertainty"          value="0.005" />
-        <param name="delay_compensation"       value="false" />
+        <param name="delay_compensation"       value="true" />
         <param name="delay_compensation_steps" value="0" />
         <param name="gv_z_alpha" value="1.0" />
         <param name="savitzky_golay_filter_z"      value="true" />
         <param name="savitzky_golay_filter_xy"     value="true" />
-        <param name="savitzky_golay_filter_window" value="81" />
+        <param name="savitzky_golay_filter_window" value="61" />
         <param name="savitzky_golay_filter_poly"   value="1" />
         <param name="savitzky_golay_filter_deriv"  value="1" />
     </node>
