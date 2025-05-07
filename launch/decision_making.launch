@@ -8,8 +8,8 @@
         <param name="sitl"          value="false"/>
 
         <param name="epsilon_dt"          value="0.5"/>
-        <param name="epsilon_roll"       value="7.5f"/>
-        <param name="epsilon_pan"       value="30f"/>
+        <param name="epsilon_roll"        value="30.0"/>
+        <param name="epsilon_pan"         value="30.0"/>
         <param name="epsilon_range"       value="3.5"/>
         <param name="epsilon_speed"       value="4.0"/>
         <param name="epsilon_swing_cnt"   value="2"/>
