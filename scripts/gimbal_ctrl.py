@@ -50,7 +50,7 @@ class GimbalControl:
         self.uav_dq = deque()
         self.uav_dq.append([0, self.pW_B_, self.R_WB_])
 
-        self.tB_S_ = np.array([0.06, 0, -0.09])  # tB_S
+        self.tB_S_ = np.array([0.06, 0.0, -0.09])  # tB_S
         self.R_WG_ = np.array([[1, 0,0],
                                [0,-1,0],
                                [0,0,-1]]) 

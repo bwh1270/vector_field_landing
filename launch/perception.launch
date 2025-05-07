@@ -39,7 +39,7 @@
         <param name="debug"              value="$(arg debug)"/>
         <param name="init_pitch"         value="-40.0"/>
         <param name="pitch_margin_ratio" value="0.10"/>
-        <param name="roll_margin_ratio"  value="0.15"/>
+        <param name="roll_margin_ratio"  value="0.10"/>
     </node>
 
     <node pkg="$(arg ros_pkg)" name="tag_esti_node" type="tag_esti_exe" output="screen">

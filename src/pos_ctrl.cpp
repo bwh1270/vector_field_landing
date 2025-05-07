@@ -459,7 +459,13 @@ void PositionControl::posCtrl(const Eigen::Vector3d &p_des, const Eigen::Vector3
     // (1) compute the error
     rel_.p = p - p_des;
     rel_.v = v - v_des;
-    const Eigen::Vector3d e = p_des - p + Eigen::Vector3d(standoff(0), standoff(1), cmd_.standoff(2));
+
+    Eigen::Vector3d e;
+    if (uav_.fsm == 4) {
+        e = p_des - p;
+    } else {
+        e = p_des - p + Eigen::Vector3d(standoff(0), standoff(1), cmd_.standoff(2));
+    }
     
     // (2) compute the control law
     Eigen::Vector3d u = P_.P * e + P_.D * (-v);
@@ -533,18 +539,21 @@ void PositionControl::velCtrl(const Eigen::Vector3d &v_des, const Eigen::Vector3
     }
     else {
         if (uav_.fsm == 4) {
-            cmd_.int_v << 0., 0., 0.;
+            // cmd_.int_v << 0., 0., 0.;
+            const Eigen::Vector3d e_lat = getLatVec(e);
+            cmd_.int_v += (V_.I * e_lat) * dt;
+            cmd_.int_v(2) = 0.;
             
         }
         else {
             cmd_.int_v += (V_.I * e) * dt;
-
-            // anti-windup clamping
-            for (int i=0; i<2; ++i) {
-                cmd_.int_v(i) = clamp(cmd_.int_v(i), -sat_.int_vxy, sat_.int_vxy);
-            }
-            cmd_.int_v(2) = clamp(cmd_.int_v(2), -sat_.int_vz, sat_.int_vz);
         }
+
+        // anti-windup clamping
+        for (int i=0; i<2; ++i) {
+            cmd_.int_v(i) = clamp(cmd_.int_v(i), -sat_.int_vxy, sat_.int_vxy);
+        }
+        cmd_.int_v(2) = clamp(cmd_.int_v(2), -sat_.int_vz, sat_.int_vz);
     }
 }
 
