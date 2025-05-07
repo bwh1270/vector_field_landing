@@ -6,7 +6,7 @@
     <!-- Aims-Quad-Gamma is 0.365 -->
   
     <node pkg="aims_als" name="pos_ctrl_node" type="pos_ctrl_exe" output="screen">
-        <param name="Hz_of_MONITOR" value="1.0"/>
+        <param name="Hz_of_MONITOR" value="10.0"/>
 
         <param name="feedforward" value="true" />
         <param name="DOB"         value="false" />
@@ -49,13 +49,13 @@
         <param name="vf_phi_delta" value="34.375" />
         <param name="vf_r_max"     value="5.0" />
         <param name="vf_k1"        value="0.35" />
-        <param name="vf_k2"        value="0.25" />
+        <param name="vf_k2"        value="0.30" />
         <param name="vf_margin"    value="10.0" />
         <param name="vf_c1"        value="8.5" />
         <param name="vf_c2"        value="2.0" />
         <param name="vf_n1"        value="2.0" />
         <param name="vf_n2"        value="2.0" />
-        <param name="vf_gamma"     value="3.0" />
+        <param name="vf_gamma"     value="3.25" />
         <param name="vf_moving"    value="false" />
 
 
@@ -68,9 +68,10 @@
         <param name="saturation_integral_vel_xy_max" value="5.0" />
         <param name="saturation_integral_vel_z_max"  value="3.0" />
         <param name="saturation_no_meas_duration"    value="0.7" />
-        <param name="saturation_critical_altitude"   value="0.35" />
+        <param name="saturation_critical_altitude"   value="0.30" />
         <param name="saturation_land_point_altitude" value="-0.1" />
-0
+        <param name="saturation_land_thrust_scaled"  value="false" />
+        <param name="saturation_uav_height"          value="0.19" />
 
         <param name="vx_kp" value="2.2" />
         <param name="vx_ki" value="0.8" />

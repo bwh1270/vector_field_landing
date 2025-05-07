@@ -72,7 +72,9 @@ MAX_SIZE(20)
     nh_private_.param<double>("saturation_acc_ratio_for_land", sat_.acc_ratio, 0.5);
     assert(sat_.acc_ratio < 0.6);
     nh_private_.param<double>("saturation_land_point_altitude", sat_.land_pnt_alt, 0.0);
-    
+    nh_private_.param<double>("saturation_land_thrust_scaled", sat_.land_thrust_scaled, true);
+    nh_private_.param<double>("saturation_uav_height", sat_.leg_len, 0.0);
+
     if (sat_.land_pnt_alt >= 0.0) {
         sat_.land_pnt_lon = 0.0;
     } else {
@@ -794,7 +796,11 @@ void PositionControl::monitor(const ros::TimerEvent &event)
         if ((rel_.p(2) < (sat_.crt_alt - sat_.land_pnt_alt)) && (flag_.landed == false)) {
             flag_.landed = true;
             sat_.t = ros::Time::now().toSec();
-            sat_.t_end = sqrt(2. * sat_.crt_alt * cmd_.thr_l);
+            if (sat_.land_thrust_scaled) {
+                sat_.t_end = sqrt(2. * (sat_.crt_alt-sat_.leg_len) * cmd_.thr_l);
+            } else {
+                sat_.t_end = sqrt(2. * (sat_.crt_alt-sat_.leg_len) * ((cmd_.thr_l / uav_.thr_h) * g_.norm()));
+            }
             // landed();
         }
     }
