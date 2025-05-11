@@ -20,9 +20,11 @@ nh_(nh), nh_private_(nh_private)
 
     nh_private_.param<double>("vf_phi_des", vf_.phi_des, -20.0);
     nh_private_.param<double>("vf_phi_delta", vf_.phi_delta, 40.0);
+    nh_private_.param<double>("vf_phi_bound", vf_.phi_bound, 10.0);
     vf_.phi_des = aims_fly::deg2rad(vf_.phi_des);
     vf_.phi_delta = aims_fly::deg2rad(vf_.phi_delta);
-    
+    vf_.phi_bound = aims_fly::deg2rad(vf_.phi_bound);
+
     nh_private_.param<double>("landing_condition_gv_speed", land_cond_.s, 5.0);
     nh_private_.param<double>("landing_condition_duration", land_cond_.T, 3.0);
     land_cond_.want2land = false;
@@ -309,7 +311,7 @@ bool DecisionMaker::checkErrorConditions()
     assert((r>=0) && (s>=0));
 
     if ((r > err_eps_.r) || (s > err_eps_.s)) {
-        ROS_WARN("Over Maximum Range or Speed");
+        ROS_WARN("Over Maximum Relative Range or Speed");
         return false;
     }
     ++err_cond_.num_of_sat;
@@ -331,18 +333,18 @@ bool DecisionMaker::checkErrorConditions()
 
     // 5. Out of Vector Field Detectable Set
     // radius is already considered in (3)
-    // Eigen::MatrixXd M;
-    // M.resize(2,3);
-    // M << 1., 0., 0.,
-    //      0., 1., 0.;
-    // const Eigen::Vector2d rel_pos_xy = M * (uav_.p - gv_.p);
-    // const double rel_pos_xy_lon = rel_pos_xy.dot(Eigen::Vector2d(cos(gv_.head), sin(gv_.head)));
-    // const double phi = atan2(rel_pos_xy_lon, uav_.p(2)-gv_.p(2));
+    Eigen::MatrixXd M;
+    M.resize(2,3);
+    M << 1., 0., 0.,
+         0., 1., 0.;
+    const Eigen::Vector2d rel_pos_xy = M * (uav_.p - gv_.p);
+    const double rel_pos_xy_lon = rel_pos_xy.dot(Eigen::Vector2d(cos(gv_.head), sin(gv_.head)));
+    const double phi = atan2(rel_pos_xy_lon, uav_.p(2)-gv_.p(2));
     
-    // if ((phi > (vf_.phi_des + vf_.phi_delta)) || (phi < (vf_.phi_des - vf_.phi_delta))) {
-    //     // ROS_DEBUG("Out of Detectable Set: [%.2f, (%.2f,f, %.2f)]", phi, vf_.phi_des + vf_.phi_delta, vf_.phi_des - vf_.phi_delta);
-    //     return false;
-    // }
+    if ((phi > (vf_.phi_des + vf_.phi_delta + vf_.phi_bound)) || (phi < (vf_.phi_des - vf_.phi_delta - vf_.phi_bound))) {
+        // ROS_DEBUG("Out of Detectable Set: [%.2f, (%.2f,f, %.2f)]", phi, vf_.phi_des + vf_.phi_delta, vf_.phi_des - vf_.phi_delta);
+        return false;
+    }
     ++err_cond_.num_of_sat;
 
     return true;

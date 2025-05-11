@@ -73,9 +73,9 @@ int main(int argc, char **argv)
 
     /* PARAMS */
     bool _visualize;
-    int _cam_dev_id, _c_width, _c_height, _c_fps, _logging_fps;
+    int _c_width, _c_height, _c_fps, _logging_fps;
     // float _c_k1, _c_k2, _c_p1, _c_p2, _c_fx, _c_fy, _c_cx, _c_cy;
-    std::string _cam_name, _cam_frame, _img_topic;
+    std::string _cam_name, _cam_frame, _img_topic, _cam_dev;
 
     nh.param<int>("c_width",   _c_width, 1280);
     nh.param<int>("c_height", _c_height, 800);
@@ -94,8 +94,8 @@ int main(int argc, char **argv)
     nh_private.param<std::string>("camera_name",   _cam_name,      "/camera");
     nh_private.param<std::string>("camera_frame", _cam_frame, "/camera_link");
     nh_private.param<std::string>("image_topic",  _img_topic,   "/image_raw");
-    
-    nh_private.param<int>("cam_dev_id", _cam_dev_id,     0);
+
+    nh_private.param<std::string>("cam_dev", _cam_dev, "/dev/video0");
     nh_private.param<bool>("visualize",  _visualize, false);
     nh_private.param<int>("logging_fps",  _logging_fps, 20);
 
@@ -108,7 +108,8 @@ int main(int argc, char **argv)
      *  - first: choose a default camera of the system
      *  - second: use the Video4Linux2 driver (backend) within OpenCV
      */
-    cv::VideoCapture vcap(_cam_dev_id, cv::CAP_V4L2);
+    // cv::VideoCapture vcap(_cam_dev_id, cv::CAP_V4L2);
+    cv::VideoCapture vcap(_cam_dev, cv::CAP_V4L2);
 
     vcap.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
     vcap.set(cv::CAP_PROP_FPS,             _c_fps);

@@ -31,7 +31,7 @@ MAX_SIZE(20)
     nh_private_.param<double>("q_filter_lpf_freq", dob_.q_lpf_freq, 0.01);
     nh_private_.param<double>("time_constant_of_uav", dob_.tau_uav, 1.0);
 
-    nh_private_.param<bool>("vf_hyper", vf_.hyper, false);
+    nh_private_.param<bool>("vf_hyper", vf_.hyper, true);
     nh_private_.param<double>("vf_phi_des", vf_.phi_des, -20.0);
     nh_private_.param<double>("vf_phi_delta", vf_.phi_delta, 40.0);
     nh_private_.param<double>("vf_r_max", vf_.r_max, 5.0);
@@ -72,8 +72,8 @@ MAX_SIZE(20)
     nh_private_.param<double>("saturation_acc_ratio_for_land", sat_.acc_ratio, 0.5);
     assert(sat_.acc_ratio < 0.6);
     nh_private_.param<double>("saturation_land_point_altitude", sat_.land_pnt_alt, 0.0);
-    nh_private_.param<bool>("saturation_land_thrust_scaled", sat_.land_thrust_scaled, true);
-    nh_private_.param<double>("saturation_uav_height", sat_.leg_len, 0.0);
+    nh_private_.param<double>("saturation_land_duration", sat_.land_duration, -0.1);
+    nh_private_.param<double>("saturation_uav_height", sat_.leg_len, 0.19);
 
     if (sat_.land_pnt_alt >= 0.0) {
         sat_.land_pnt_lon = 0.0;
@@ -132,7 +132,7 @@ MAX_SIZE(20)
         } else {
             // header
             ROS_INFO("File is opened: %s", filename.c_str());
-            log_ << "time,uav_p_x,uav_p_y,uav_p_z,uav_v_x,uav_v_y,uav_v_z,uav_a_x,uav_a_y,uav_a_z,uav_head,gv_p_x,gv_p_y,gv_p_z,gv_v_x,gv_v_y,gv_v_z,gv_head,cmd_v_x,cmd_v_y,cmd_v_z,cmd_int_v_x,cmd_int_v_y,cmd_int_v_z,cmd_a_x,cmd_a_y,cmd_a_z,uav_b3_e1,uav_b3_e2,uav_b3_e3,vf_h1,vf_h2\n";
+            log_ << "time,uav_p_x,uav_p_y,uav_p_z,uav_v_x,uav_v_y,uav_v_z,uav_a_x,uav_a_y,uav_a_z,uav_head,gv_p_x,gv_p_y,gv_p_z,gv_v_x,gv_v_y,gv_v_z,gv_head,cmd_v_x,cmd_v_y,cmd_v_z,cmd_int_v_x,cmd_int_v_y,cmd_int_v_z,cmd_a_x,cmd_a_y,cmd_a_z,uav_b3_e1,uav_b3_e2,uav_b3_e3,vf_h1,vf_h2,eta_dot_1,eta_dot_2,landed\n";
         }
     }
 
@@ -800,17 +800,28 @@ void PositionControl::monitor(const ros::TimerEvent &event)
             initCmd();
             ROS_INFO("No measurement in time");
         }
+        
+        const double R = sqrt(rel_.p(0)*rel_.p(0) + rel_.p(1)*rel_.p(1));
+        const double R_bound = 0.5;
 
         ROS_INFO("To critical altitude: %.2f", rel_.p(2) - sat_.crt_alt + sat_.land_pnt_alt);
-        if ((rel_.p(2) < (sat_.crt_alt - sat_.land_pnt_alt)) && (flag_.landed == false)) {
-            flag_.landed = true;
-            sat_.t = ros::Time::now().toSec();
-            if (sat_.land_thrust_scaled) {
-                sat_.t_end = sqrt(2. * (sat_.crt_alt-sat_.leg_len) * cmd_.thr_l);
-            } else {
-                sat_.t_end = sqrt(2. * (sat_.crt_alt-sat_.leg_len) * ((cmd_.thr_l / uav_.thr_h) * g_.norm()));
+        
+        if ((flag_.landed == false) && (R < R_bound)) {
+            if (rel_.p(2) < (sat_.crt_alt - sat_.land_pnt_alt)) {
+                
+                flag_.landed = true;
+                
+                sat_.t = ros::Time::now().toSec();                
+                if (sat_.land_duration < 0.0) {
+                    const double THR_L = (cmd_.thr_l / uav_.thr_h) * g_.norm();
+                    sat_.t_end = sqrt(2. * abs(sat_.crt_alt-sat_.leg_len) / THR_L);
+
+                } else {
+                    sat_.t_end = sat_.land_duration;
+                }
+                
             }
-            // landed();
+
         }
     }
 }
@@ -871,7 +882,7 @@ void PositionControl::logging()
 {
     if (log_.is_open()) {
         log_ << std::fixed << std::setprecision(5);
-        log_ << ros::Time::now().toSec() << "," << uav_.p(0) << "," << uav_.p(1) << "," << uav_.p(2) << "," << uav_.v(0) << "," << uav_.v(1) << "," << uav_.v(2) << "," << uav_.a(0) << "," << uav_.a(1) << "," << uav_.a(2) << "," << uav_.head << "," << gv_.p(0) << "," << gv_.p(1) << "," << gv_.p(2) << "," << gv_.v(0) << "," << gv_.v(1) << "," << gv_.v(2) << "," << gv_.head << "," << cmd_.v(0) << "," << cmd_.v(1) << "," << cmd_.v(2) << "," << cmd_.int_v(0) << "," << cmd_.int_v(1) << "," << cmd_.int_v(2) << "," << cmd_.a(0) << "," << cmd_.a(1) << "," << cmd_.a(2) << "," << uav_.b3(0) << "," << uav_.b3(1) << "," << uav_.b3(2) << "," << vf_.h(0) << "," << vf_.h(1)  << "\n";
+        log_ << ros::Time::now().toSec() << "," << uav_.p(0) << "," << uav_.p(1) << "," << uav_.p(2) << "," << uav_.v(0) << "," << uav_.v(1) << "," << uav_.v(2) << "," << uav_.a(0) << "," << uav_.a(1) << "," << uav_.a(2) << "," << uav_.head << "," << gv_.p(0) << "," << gv_.p(1) << "," << gv_.p(2) << "," << gv_.v(0) << "," << gv_.v(1) << "," << gv_.v(2) << "," << gv_.head << "," << cmd_.v(0) << "," << cmd_.v(1) << "," << cmd_.v(2) << "," << cmd_.int_v(0) << "," << cmd_.int_v(1) << "," << cmd_.int_v(2) << "," << cmd_.a(0) << "," << cmd_.a(1) << "," << cmd_.a(2) << "," << uav_.b3(0) << "," << uav_.b3(1) << "," << uav_.b3(2) << "," << vf_.h(0) << "," << vf_.h(1) << rel_.eta_dot(0) << rel_.eta_dot(1) << flag_.landed << "\n";
     }
 }
 

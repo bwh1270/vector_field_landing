@@ -3,7 +3,7 @@
     <arg name="ros_pkg" default="aims_als" />
 
     <node pkg="$(arg ros_pkg)" name="decision_maker_node" type="decision_maker_exe" output="screen">
-        <param name="Hz_of_FSM"     value="50.0"/>
+        <param name="Hz_of_FSM"     value="40.0"/>
         <param name="Hz_of_MONITOR" value="1.0"/>
         <param name="sitl"          value="false"/>
 
@@ -17,6 +17,8 @@
 
         <param name="vf_phi_des"    value="-27.5"/>
         <param name="vf_phi_delta"  value="34.375"/>
+        <param name="vf_phi_bound"  value="10.0"/>
+
 
         <param name="landing_condition_gv_speed" value="5.0"/>
         <param name="landing_condition_duration" value="4.0"/>

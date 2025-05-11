@@ -150,7 +150,8 @@ class DecisionMaker
 
         struct vf_t {
             double phi_des;
-            double phi_delta; // boundary = phi_des +- phi_delta
+            double phi_delta; // boundary = phi_des +- phi_delta +- phi_bound
+            double phi_bound;
         };
 
         // Landing Conditions

@@ -70,8 +70,8 @@
         <param name="saturation_no_meas_duration"    value="0.7" />
         <param name="saturation_critical_altitude"   value="0.25" />
         <param name="saturation_land_point_altitude" value="-0.1" />
-        <param name="saturation_land_thrust_scaled"  value="true" />
-        <param name="saturation_uav_height"          value="0." />
+        <param name="saturation_land_duration"       value="1.0" />
+        <param name="saturation_uav_height"          value="0.19" />
 
         <param name="vx_kp" value="2.2" />
         <param name="vx_ki" value="0.8" />

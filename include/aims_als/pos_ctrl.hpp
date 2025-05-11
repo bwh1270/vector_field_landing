@@ -230,7 +230,7 @@ class PositionControl
             double t_end;
             double land_pnt_alt;
             double land_pnt_lon;
-            bool land_thrust_scaled;
+            double land_duration;
             double leg_len;
         };
 
