@@ -13,7 +13,7 @@
     <rosparam file="$(find aims_als)/config/arducam_param.yaml" />
 
     <!-- NODES -->
-    <node pkg="$(arg ros_pkg)" name="img_pub_node" type="img_pub_exe" output="screen">
+    <!-- <node pkg="$(arg ros_pkg)" name="img_pub_node" type="img_pub_exe" output="screen">
         <param name="camera_name"  value="$(arg camera_name)" />
         <param name="camera_frame" value="$(arg camera_frame)" />
         <param name="image_topic"  value="$(arg image_topic)" />
@@ -25,14 +25,14 @@
     <node pkg="$(arg ros_pkg)" name="fractal_detection_node" type="fractal_detection_exe" output="screen">
         <param name="marker_size"          value="0.60"/> 
         <param name="marker_configuration" value="FRACTAL_5L_6"/>
-        <!-- <param name="marker_size"          value="0.44"/> 
-        <param name="marker_configuration" value="FRACTAL_4L_6"/> -->
+        <param name="marker_size"          value="0.44"/> 
+        <param name="marker_configuration" value="FRACTAL_4L_6"/>
         <param name="SSR"                  value="true" />
         <param name="debug"                value="$(arg debug)"/>
         <param name="visualize"            value="$(arg visualize)"/>
-    </node>
+    </node> -->
 
-   <node pkg="$(arg ros_pkg)" name="gimbal_ctrl_node" type="gimbal_ctrl.py" output="screen">
+   <!-- <node pkg="$(arg ros_pkg)" name="gimbal_ctrl_node" type="gimbal_ctrl.py" output="screen">
         <param name="loop_rate"          value="40.0"/> 
         <param name="serial_port"        value="/dev/gimbal"/>
         <param name="baud_rate"          value="115200"/>
@@ -55,6 +55,21 @@
         <param name="savitzky_golay_filter_window" value="41" />
         <param name="savitzky_golay_filter_poly"   value="1" />
         <param name="savitzky_golay_filter_deriv"  value="1" />
+    </node> -->
+
+    <node name="video_stream" pkg="video_stream_opencv" type="video_stream">
+        <!-- ROS 토픽 이름 -->
+        <param name="camera_name"    value="siyi_cam" />
+        <param name="image_topic"    value="/camera/image_raw" />
+        <!-- RTSP 스트림 URL -->
+        <param name="video_stream_provider" value="rtsp://192.168.144.25:8554/main.264" />
+        <!-- Transport 프로토콜: tcp 또는 udp -->
+        <param name="transport"       value="tcp" />
+        <!-- OpenCV 캡처 설정 -->
+        <param name="frame_rate"      value="30.0" />
+        <param name="loop_v4l"        value="false" />
     </node>
+
+
 
 </launch>

@@ -51,8 +51,8 @@ include_directories(
   ${aruco_INCLUDE_DIRS}
 )
 
-add_executable(img_pub_exe src/img_pub.cpp)
-target_link_libraries(img_pub_exe ${catkin_LIBRARIES} ${OpenCV_LIBS})
+add_executable(siyi_img_pub_exe src/siyi_img_pub.cpp)
+target_link_libraries(siyi_img_pub_exe ${catkin_LIBRARIES} ${OpenCV_LIBS})
 
 add_executable(fractal_detection_exe src/fractal_detection.cpp)
 target_link_libraries(fractal_detection_exe ${catkin_LIBRARIES} ${OpenCV_LIBS} ${aruco_LIBRARIES})
@@ -74,6 +74,7 @@ catkin_install_python(PROGRAMS
   scripts/led_ctrl.py
   scripts/sitl/gv_ctrl.py
   scripts/video_writer.py
+  # scripts/test/video_stream.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -105,3 +106,6 @@ catkin_install_python(PROGRAMS
 # add_executable(steep_angle_exp_exe src/test/steep_angle_exp.cpp)
 # target_link_libraries(steep_angle_exp_exe ${catkin_LIBRARIES})
 
+# *** USB CAMERA *** 
+# add_executable(img_pub_exe src/img_pub.cpp)
+# target_link_libraries(img_pub_exe ${catkin_LIBRARIES} ${OpenCV_LIBS})
