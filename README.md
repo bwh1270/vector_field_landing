@@ -1,4 +1,7 @@
-# Aims: Autonomous Landing System (ALS)
+# Vector Field-Based Robust Quadrotor Landing on a Moving Ground Platform
+
+This ros package was used in the robust quadrotor landing. 
+
 
 ### Tips:
 ```
