@@ -10,7 +10,7 @@ from collections import deque
 import rospy
 from std_msgs.msg import Bool, Header
 from geometry_msgs.msg import PoseStamped, PointStamped
-from aims_als.msg import Marker
+from vector_field_landing.msg import Marker
 
 '''
 Gimbal Control Class

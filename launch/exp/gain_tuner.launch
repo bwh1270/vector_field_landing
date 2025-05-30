@@ -5,7 +5,7 @@
     <!-- axis = {x,y,z}              -->
     <!-- head = [deg]                -->
 
-    <node pkg="aims_als" name="pid_tuner_node" type="pid_tuner_node" output="screen">
+    <node pkg="vector_field_landing" name="pid_tuner_node" type="pid_tuner_node" output="screen">
         
         <param name="tuning_what"   value="position" />
         <param name="tuning_axis"   value="z" />

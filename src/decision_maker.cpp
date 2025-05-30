@@ -1,4 +1,4 @@
-#include "aims_als/decision_maker.hpp"
+#include "vector_field_landing/decision_maker.hpp"
 
 
 
@@ -95,7 +95,7 @@ void DecisionMaker::initErrCond()
     err_cond_.cnt = 0;
 }
 
-void DecisionMaker::markerCb(const aims_als::Marker::ConstPtr &msg)
+void DecisionMaker::markerCb(const vector_field_landing::Marker::ConstPtr &msg)
 {
     err_cond_.detected = msg->detect;
     err_cond_.t0 = ros::Time::now().toSec();

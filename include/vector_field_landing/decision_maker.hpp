@@ -47,13 +47,13 @@
 #include "geometry_msgs/PoseStamped.h"
 #include "geometry_msgs/TwistStamped.h"
 #include "nav_msgs/Odometry.h"
-#include "aims_als/Marker.h"
+#include "vector_field_landing/Marker.h"
 #include "mavros_msgs/State.h"
 #include "mavros_msgs/SetMode.h"
 
-#include "aims_als/lib/util.h"
-#include "aims_als/lib/filter.h"
-#include "aims_als/lib/math.h"
+#include "vector_field_landing/lib/util.h"
+#include "vector_field_landing/lib/filter.h"
+#include "vector_field_landing/lib/math.h"
 
 using namespace aims_fly;
 
@@ -191,7 +191,7 @@ class DecisionMaker
         void initUAV();
         void initErrCond();
 
-        void markerCb(const aims_als::Marker::ConstPtr &msg);
+        void markerCb(const vector_field_landing::Marker::ConstPtr &msg);
         void gimbalAngleCb(const geometry_msgs::PointStamped::ConstPtr &msg);
         void uavPoseCb(const geometry_msgs::PoseStamped::ConstPtr &msg);
         void uavTwistCb(const geometry_msgs::TwistStamped::ConstPtr &msg);

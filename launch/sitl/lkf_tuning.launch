@@ -1,6 +1,6 @@
 <launch>
     <!-- ARGS -->
-    <arg name="ros_pkg" default="aims_als" />
+    <arg name="ros_pkg" default="vector_field_landing" />
     <arg name="world_frame" default="map" />
     <arg name="uav_frame" default="base_link" />
     <arg name="camera_frame" default="camera_link" />

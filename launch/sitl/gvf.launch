@@ -1,6 +1,6 @@
 <launch>
     <!-- ARGS -->
-    <arg name="ros_pkg" default="aims_als" />
+    <arg name="ros_pkg" default="vector_field_landing" />
 
     <node pkg="$(arg ros_pkg)" name="guidance_node" type="guidance_exe" output="screen">
         <!-- <param name="k1"         value="1.44"/>

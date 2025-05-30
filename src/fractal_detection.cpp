@@ -45,9 +45,9 @@
 
 /* For ROS image data */
 #include "ros/ros.h"
-#include "aims_als/Marker.h"
+#include "vector_field_landing/Marker.h"
 #include "std_msgs/Time.h"
-#include "aims_als/ImgWithHeader.h"
+#include "vector_field_landing/ImgWithHeader.h"
 
 /* For ArUco3 Lib */
 #include <aruco/fractaldetector.h>
@@ -55,7 +55,7 @@
 /* For transformation */
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
-#include "aims_als/lib/math.h"
+#include "vector_field_landing/lib/math.h"
 
 using namespace aims_fly;
 using namespace cv;
@@ -89,14 +89,14 @@ class FractalDetection
         bool _debug, _visualize, _ssr;
 
         // variables
-        aims_als::Marker fractal_marker_;
+        vector_field_landing::Marker fractal_marker_;
         // std_msgs::Time img_time_;
 
         void initDetector();
         void rodrigues2Quat(const cv::Mat &rvec);
         void setTranslation(const cv::Mat &tvec);
         void imgCb(const sensor_msgs::ImageConstPtr &msg);
-        void headerImgCb(const aims_als::ImgWithHeader::ConstPtr &msg);
+        void headerImgCb(const vector_field_landing::ImgWithHeader::ConstPtr &msg);
 };
 
 
@@ -128,7 +128,7 @@ FractalDetection::FractalDetection(const ros::NodeHandle &nh, const ros::NodeHan
     img_sub_ = it_.subscribe("/camera/image_raw_decompressed", 1, &FractalDetection::imgCb, this);
     sub_header_img_ = nh_.subscribe("/aims/header_image", 1, &FractalDetection::headerImgCb, this, ros::TransportHints().tcpNoDelay());
 
-    pub_marker_ = nh_.advertise<aims_als::Marker>("/aims/fractal_detections", 1);
+    pub_marker_ = nh_.advertise<vector_field_landing::Marker>("/aims/fractal_detections", 1);
 
     initDetector();
 
@@ -309,7 +309,7 @@ void FractalDetection::imgCb(const sensor_msgs::ImageConstPtr &msg)
     }
 }
 
-void FractalDetection::headerImgCb(const aims_als::ImgWithHeader::ConstPtr &msg)
+void FractalDetection::headerImgCb(const vector_field_landing::ImgWithHeader::ConstPtr &msg)
 {
     cv_bridge::CvImagePtr cv_ptr;
     try {

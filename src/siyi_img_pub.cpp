@@ -21,7 +21,7 @@
 #include "ros/ros.h"
 #include "sensor_msgs/Image.h"
 #include "sensor_msgs/CameraInfo.h"
-#include "aims_als/ImgWithHeader.h"
+#include "vector_field_landing/ImgWithHeader.h"
 
 
 int main(int argc, char **argv)
@@ -48,7 +48,7 @@ int main(int argc, char **argv)
     nh_private.param<int>("logging_fps",  _logging_fps, 20);
 
     image_transport::Publisher pub_img = it.advertise(_cam_name + _img_topic, 1);
-    ros::Publisher pub_header_img = nh.advertise<aims_als::ImgWithHeader>("/aims/header_image", 1);
+    ros::Publisher pub_header_img = nh.advertise<vector_field_landing::ImgWithHeader>("/aims/header_image", 1);
     
 
     /** @arg
@@ -93,7 +93,7 @@ int main(int argc, char **argv)
 
         sensor_msgs::ImagePtr img_ptr = cv_bridge::CvImage(std_msgs::Header(), "bgr8", cv_img).toImageMsg();
 
-        aims_als::ImgWithHeader header_img_msg;
+        vector_field_landing::ImgWithHeader header_img_msg;
         header_img_msg.header.stamp = now;
         header_img_msg.header.frame_id = _cam_frame;
         header_img_msg.image = *img_ptr;      

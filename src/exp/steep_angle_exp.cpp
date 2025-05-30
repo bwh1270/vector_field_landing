@@ -40,15 +40,15 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "nav_msgs/Odometry.h"
-#include "aims_als/Marker.h"
-#include "aims_als/TFMarker.h"
+#include "vector_field_landing/Marker.h"
+#include "vector_field_landing/TFMarker.h"
 
 #include "mavros_msgs/SetMode.h"
 
 /* Aims */
-#include "aims_als/lib/math.h"
-#include "aims_als/lib/util.h"
-#include "aims_als/lib/uav.h"
+#include "vector_field_landing/lib/math.h"
+#include "vector_field_landing/lib/util.h"
+#include "vector_field_landing/lib/uav.h"
 
 using namespace aims_fly;
 

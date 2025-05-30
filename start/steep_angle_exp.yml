@@ -5,8 +5,8 @@ windows:
   - main:
       layout: tiled
       panes:
-        - roslaunch aims_als real_world.launch
-        - waitForRos; roslaunch aims_als steep_angle_exp.launch
+        - roslaunch vector_field_landing real_world.launch
+        - waitForRos; roslaunch vector_field_landing steep_angle_exp.launch
         - waitForRos; rosbag record /aims/data
   
   - monitor:

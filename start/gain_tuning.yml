@@ -5,9 +5,9 @@ windows:
   - main:
       layout: tiled
       panes:
-        - roslaunch aims_als real_world.launch
-        - waitForRos; roslaunch aims_als controller.launch
-        - waitForRos; roslaunch aims_als gain_tuner.launch >> $(rospack find aims_als)/data/results.txt
+        - roslaunch vector_field_landing real_world.launch
+        - waitForRos; roslaunch vector_field_landing controller.launch
+        - waitForRos; roslaunch vector_field_landing gain_tuner.launch >> $(rospack find vector_field_landing)/data/results.txt
         - cd $(rospack find aims_als)/data
 
   - find:

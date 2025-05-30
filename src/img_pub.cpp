@@ -21,7 +21,7 @@
 #include "ros/ros.h"
 #include "sensor_msgs/Image.h"
 #include "sensor_msgs/CameraInfo.h"
-#include "aims_als/ImgWithHeader.h"
+#include "vector_field_landing/ImgWithHeader.h"
 
 
 // void setCamParam(sensor_msgs::CameraInfo &cam_info)

@@ -1,6 +1,6 @@
 <launch>
     <!-- ARGS -->
-    <arg name="ros_pkg" default="aims_als"/>
+    <arg name="ros_pkg" default="vector_field_landing"/>
     <arg name="visualize" default="false"/>
     <arg name="debug" default="false" />
 

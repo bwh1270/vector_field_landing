@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(aims_als)
+project(vector_field_landing)
 
 add_compile_options(-std=c++14)
 add_compile_options("-O3")

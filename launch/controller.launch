@@ -5,7 +5,7 @@
     <!-- Iris SITL is 0.70 -->
     <!-- Aims-Quad-Gamma is 0.365 -->
   
-    <node pkg="aims_als" name="pos_ctrl_node" type="pos_ctrl_exe" output="screen">
+    <node pkg="vector_field_landing" name="pos_ctrl_node" type="pos_ctrl_exe" output="screen">
         <param name="Hz_of_MONITOR" value="50.0"/>
 
         <param name="feedforward" value="true" />
@@ -97,6 +97,6 @@
 
     </node>
 
-     <node pkg="aims_als" name="led_ctrl_node" type="led_ctrl.py" output="screen" />
+     <node pkg="vector_field_landing" name="led_ctrl_node" type="led_ctrl.py" output="screen" />
 
 </launch>

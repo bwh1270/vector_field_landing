@@ -1,6 +1,6 @@
 <launch>
     <!-- ARGS -->
-    <arg name="ros_pkg" default="aims_als" />
+    <arg name="ros_pkg" default="vector_field_landing" />
 
     <node pkg="$(arg ros_pkg)" name="decision_maker_node" type="decision_maker_exe" output="screen">
         <param name="Hz_of_FSM"     value="40.0"/>
