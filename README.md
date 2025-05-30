@@ -1,17 +1,15 @@
 # Vector Field-Based Robust Quadrotor Landing on a Moving Ground Platform
 
-This ros package was used in the robust quadrotor landing. 
+## Description
+
+This ros package was used to the robust quadrotor landing and computed in Nvidia Jetson Xavier NX. 
+This contains not only sources related to landing, but also related to tracking such as tuning method for the position control (PD) and velocity control (PID or PI).
+Furthermore, it provides the fractal marker ground platform which can be controlled by gv_ctrl.py in the gazebo simulation.  
 
 ## System Architecture
 
 ![screenshot](./img/7b.png)
 
-
-### Tips:
-```
-./sitl_start.sh 2> debug/sitl_debug.txt
-./real_world_start.sh 2> debug/real_world_start.sh
-```
 
 
 ## Fractal Marker Issue
@@ -24,12 +22,13 @@ This ros package was used in the robust quadrotor landing.
 
 **Note:** The fun thing is that the unified code which are contained the videocapture and fractal detection is slower than seperated code in Jetson platform.
 
+
 ## Position/Velocity  Control Tuning
 - ./aims_start.sh ctrl_tuning.yml
 ctrl_tuning.yml will use the controller.launch and setpoint.launch. (safety.launch is the option)
 
 
-## Position(PD) and Velocity(PI) Controller Gain Tuning
+### Position(PD) and Velocity(PI) Controller Gain Tuning
 **Starting Command:**
 ```
 ./aims_start.sh gain_tuning.yml
@@ -66,3 +65,9 @@ ctrl_tuning.yml will use the controller.launch and setpoint.launch. (safety.laun
         6. UAV will reach some step signal.
         7. Performance metrices and some information of tuning will be recored in results.txt.
         Note: Don't worry about the position frame. If you set the step size 1.5 and your vehicle hovers at 3.24 m, then it will reach at (3.24 + 1.5)m. 
+
+## Tips:
+```
+./sitl_start.sh 2> debug/sitl_debug.txt
+./real_world_start.sh 2> debug/real_world_start.sh
+```
